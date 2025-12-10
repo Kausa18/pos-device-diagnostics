@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:gravity="top">
+
+    <TextView
+        android:id="@+id/titleText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Feitian Diagnostics"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        android:layout_gravity="center_horizontal"
+        android:paddingBottom="20dp" />
+
+    <Button
+        android:id="@+id/btnRunDiagnostics"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Run Diagnostics"
+        android:padding="12dp" />
+
+    <TextView
+        android:id="@+id/statusLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Status: Waiting"
+        android:textSize="18sp"
+        android:paddingTop="20dp" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="20dp">
+
+        <TextView
+            android:id="@+id/outputLog"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="No logs yet..."
+            android:padding="10dp"
+            android:background="#EEEEEE" />
+    </ScrollView>
+
+</LinearLayout>
