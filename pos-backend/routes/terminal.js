@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const db = require("../db");
+const { db } = require("../db");
 
 // middleware (reuse API key)
 router.use((req, res, next) => {
@@ -11,22 +11,8 @@ router.use((req, res, next) => {
     next();
 });
 
-// GET /terminals
 router.get("/", (req, res) => {
-    const sql = `
-    SELECT terminal_id,
-           COUNT(*) AS total_reports,
-           MAX(created_at) AS last_report,
-           (SELECT summary_status
-            FROM diagnostics d2
-            WHERE d2.terminal_id = d1.terminal_id
-            ORDER BY id DESC LIMIT 1) AS last_status
-    FROM diagnostics d1
-    GROUP BY terminal_id
-    ORDER BY last_report DESC
-  `;
-
-    db.all(sql, [], (err, rows) => {
+    db.all("SELECT * FROM terminals ORDER BY last_seen DESC", [], (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(rows);
     });

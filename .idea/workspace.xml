@@ -4,7 +4,17 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="576af655-ec59-4174-a2c9-2ff531e41a04" name="Changes" comment="" />
+    <list default="true" id="576af655-ec59-4174-a2c9-2ff531e41a04" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pos-backend/db.js" beforeDir="false" afterPath="$PROJECT_DIR$/pos-backend/db.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pos-backend/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/pos-backend/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pos-backend/public/dashboard.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pos-backend/public/dashboard.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pos-backend/routes/diagnostics.js" beforeDir="false" afterPath="$PROJECT_DIR$/pos-backend/routes/diagnostics.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pos-dashboard/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/pos-dashboard/index.html" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -16,9 +26,9 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 3
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 3
+}</component>
   <component name="ProjectId" id="373mFLHuoJMGi9xWegARsoZWa17" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -26,6 +36,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "JAR Application.FTSDK_api_V1.0.1.11_20241029.jar.executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.cidr.known.project.marker": "true",
@@ -34,11 +45,24 @@
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
     "dart.analysis.tool.window.visible": "false",
+    "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/Kausa/Documents/pos-device-diagnostics",
     "settings.editor.selected.configurable": "AndroidSdkUpdater",
     "show.migrate.to.gradle.popup": "false"
   }
 }]]></component>
+  <component name="RunManager">
+    <configuration name="FTSDK_api_V1.0.1.11_20241029.jar" type="JarApplication" temporary="true">
+      <option name="JAR_PATH" value="$PROJECT_DIR$/pos-mobile-app/app/lib/FTSDK_api_V1.0.1.11_20241029.jar" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="JAR Application.FTSDK_api_V1.0.1.11_20241029.jar" />
+      </list>
+    </recent_temporary>
+  </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="576af655-ec59-4174-a2c9-2ff531e41a04" name="Changes" comment="" />

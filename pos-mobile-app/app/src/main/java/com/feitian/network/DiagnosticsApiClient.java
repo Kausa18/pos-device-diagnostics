@@ -1,7 +1,6 @@
 package com.feitian.network;
 
 import android.util.Log;
-import com.feitian.diagnostics.BuildConfig;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -16,27 +15,23 @@ public class DiagnosticsApiClient {
 
     private static final String TAG = "DiagnosticsApiClient";
     
-    // Updated to your computer's LAN IP 
-    private static final String ENDPOINT = "http://192.168.100.42:4000/diagnostics";
+    // Using your computer's LAN IP
+    private static final String ENDPOINT = "http://192.168.1.103:4000/diagnostics";
 
     public static String send(JSONObject payload) {
         HttpURLConnection connection = null;
 
         try {
-            Log.d(TAG, "Sending payload: " + payload);
+            Log.d(TAG, "Connecting to: " + ENDPOINT);
             URL url = new URL(ENDPOINT);
             connection = (HttpURLConnection) url.openConnection();
 
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Content-Type", "application/json");
             
-            // Get API key from BuildConfig with fallback
-            String apiKey = "supersecret123";
-            try {
-                apiKey = BuildConfig.API_KEY;
-            } catch (Throwable ignored) {}
+            // Hardcoding the key to 100% resolve "Unauthorized"
+            connection.setRequestProperty("x-api-key", "supersecret123");
             
-            connection.setRequestProperty("x-api-key", apiKey);
             connection.setConnectTimeout(5000);
             connection.setReadTimeout(5000);
             connection.setDoOutput(true);
@@ -47,7 +42,7 @@ public class DiagnosticsApiClient {
             }
 
             int responseCode = connection.getResponseCode();
-            Log.d(TAG, "Response Code: " + responseCode);
+            Log.d(TAG, "HTTP Response: " + responseCode);
             
             if (responseCode == 200 || responseCode == 201) {
                 return null; // Success
@@ -62,7 +57,7 @@ public class DiagnosticsApiClient {
                         }
                     }
                 }
-                return "Server Error " + responseCode + (errorResponse.length() > 0 ? ": " + errorResponse : "");
+                return "Error " + responseCode + ": " + (errorResponse.length() > 0 ? errorResponse : "No message");
             }
 
         } catch (Exception e) {

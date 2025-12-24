@@ -74,18 +74,13 @@
     <div class="container">
         <h2>Diagnostics Records</h2>
 
-        <div class="filter-bar">
-            <input id="terminalFilter" type="text" placeholder="Filter by Terminal ID" />
-            <button onclick="loadDiagnostics()">Apply Filter</button>
-        </div>
-
         <table>
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th>#</th>
                     <th>Terminal ID</th>
                     <th>Status</th>
-                    <th>Timestamp</th>
+                    <th>Received At</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -95,14 +90,8 @@
 
     <script>
         async function loadDiagnostics() {
-            const terminalFilter = document.getElementById("terminalFilter").value;
-
-            const url = terminalFilter
-                ? `http://localhost:4000/diagnostics?terminal_id=${terminalFilter}`
-                : `http://localhost:4000/diagnostics`;
-
             try {
-                const response = await fetch(url, {
+                const response = await fetch("http://localhost:4000/diagnostics", {
                     headers: {
                         "x-api-key": "supersecret123",  
                         "Content-Type": "application/json"
@@ -118,16 +107,16 @@
                 const tbody = document.getElementById("diagTable");
                 tbody.innerHTML = "";
 
-                data.forEach(row => {
+                data.forEach((row, index) => {
                     tbody.innerHTML += `
                 <tr>
-                    <td>${row.id}</td>
-                    <td>${row.terminal_id}</td>
-                    <td class="${row.summary_status === "pass" ? "status-pass" : "status-fail"}">
-                        ${row.summary_status.toUpperCase()}
+                    <td>${index + 1}</td>
+                    <td>${row.payload.terminal_id || 'N/A'}</td>
+                    <td class="${row.summaryStatus === "pass" ? "status-pass" : "status-fail"}">
+                        ${row.summaryStatus.toUpperCase()}
                     </td>
-                    <td>${row.timestamp_utc}</td>
-                    <td><button onclick='viewDetails(${JSON.stringify(row)})'>View</button></td>
+                    <td>${row.receivedAt}</td>
+                    <td><button onclick='openDashboard("${row.payload.terminal_id}")'>View</button></td>
                 </tr>
             `;
                 });
@@ -137,8 +126,8 @@
             }
         }
 
-        function viewDetails(record) {
-            alert(JSON.stringify(record, null, 2));
+        function openDashboard(deviceId) {
+            window.location.href = `http://localhost:4000/?deviceId=${deviceId}`;
         }
 
         loadDiagnostics();
