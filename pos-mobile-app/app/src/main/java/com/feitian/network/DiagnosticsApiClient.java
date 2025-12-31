@@ -16,7 +16,7 @@ public class DiagnosticsApiClient {
     private static final String TAG = "DiagnosticsApiClient";
     
     // Using your computer's LAN IP
-    private static final String ENDPOINT = "http://192.168.1.103:4000/diagnostics";
+    private static final String ENDPOINT = "http://192.168.100.19 :4000/diagnostics";
 
     public static String send(JSONObject payload) {
         HttpURLConnection connection = null;

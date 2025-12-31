@@ -1,8 +1,26 @@
 <resources>
-    <string name="app_name">FeitianDiagnostics</string>
+    <string name="app_name">Izyane Diagnostics</string>
     <string name="status_running_diagnostics">Status: Running diagnostics...</string>
     <string name="starting_diagnostics">Starting diagnostics...\n</string>
     <string name="test_1_passed">Test 1: Passed\n</string>
     <string name="test_2_passed">Test 2: Passed\n</string>
     <string name="status_diagnostics_complete">Status: Diagnostics complete</string>
+    <string name="status_uploading">Status: Uploading results...</string>
+    <string name="status_upload_successful">Status: Upload successful</string>
+    <string name="status_upload_failed">Status: Upload failed</string>
+    <string name="upload_success">\nUpload: SUCCESS\n</string>
+    <string name="upload_failed">\nUpload: FAILED\nReason: %1$s\n</string>
+    <string name="results_saved_locally">\n⚠ Results saved locally.\nThey will be uploaded when network is available.\n</string>
+    <string name="diagnostics_complete_banner">\n====================\nDiagnostics Complete\n====================\n</string>
+    <string name="status_test_complete">Test Complete</string>
+    <string name="status_touch_test_complete">Touch Test Complete</string>
+    <string name="running_test_prefix">Running: %1$s\n</string>
+    <string name="receipt_printed_manually">\nReceipt printed manually.\n</string>
+    <string name="no_history_data">No data available yet.</string>
+    <string name="no_history_records_found">No records found for filter: %1$s</string>
+    <string name="all_tests_complete">All Tests Complete</string>
+    <string name="finalizing_report">Finalizing report...</string>
+    <string name="upload_successful">Upload Successful</string>
+    <string name="upload_failed_with_reason">Upload Failed: %1$s</string>
+    <string name="countdown_zero">0.0s</string>
 </resources>

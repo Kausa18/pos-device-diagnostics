@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/background"
+        app:elevation="0dp">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:title="Running Diagnostics"
+            app:titleCentered="true"
+            app:titleTextColor="@color/text_primary" />
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:gravity="center_horizontal"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <!-- Progress Indicator -->
+        <FrameLayout
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_marginTop="32dp">
+
+            <ProgressBar
+                android:id="@+id/diagnosticsProgress"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:indeterminate="false"
+                android:max="100"
+                android:progress="0"
+                android:progressDrawable="@drawable/circular_progress" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/testCountText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textColor="@color/brand_blue"
+                    android:textSize="40sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="OF 11 TESTS"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp"
+                    android:letterSpacing="0.1" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/currentTestLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:text="Initializing..."
+            android:textColor="@color/text_primary"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/promptText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:gravity="center"
+            android:text=""
+            android:textColor="@color/brand_blue"
+            android:textSize="16sp" />
+
+        <!-- Countdown Timer Display -->
+        <TextView
+            android:id="@+id/countdownTimer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text=""
+            android:textColor="@color/status_fail"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/completionStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:text=""
+            android:textColor="@color/status_pass"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPrintReceipt"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Print Receipt"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            android:visibility="gone"
+            app:cornerRadius="28dp"
+            android:layout_marginBottom="12dp"
+            android:backgroundTint="@color/brand_blue" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDone"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Back to Dashboard"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            android:visibility="gone"
+            app:cornerRadius="28dp"
+            android:backgroundTint="@color/brand_blue" />
+
+    </LinearLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

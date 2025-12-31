@@ -5,6 +5,7 @@ const db = new sqlite3.Database(process.env.DB_FILE || "./diagnostics.db");
 
 function init(callback) {
     db.serialize(() => {
+        // Create tables
         db.run(`
         CREATE TABLE IF NOT EXISTS diagnostics (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -13,13 +14,7 @@ function init(callback) {
           summary_status TEXT,
           payload TEXT
         )
-        `, (err) => {
-            if (err) {
-                console.error("Error creating diagnostics table:", err.message);
-            } else {
-                console.log("Diagnostics table ready.");
-            }
-        });
+        `);
 
         db.run(`
         CREATE TABLE IF NOT EXISTS terminals (
@@ -30,15 +25,20 @@ function init(callback) {
             sdk_level INTEGER,
             last_seen TEXT
         )
-        `, (err) => {
-            if (err) {
-                console.error("Error creating terminals table:", err.message);
-            } else {
-                console.log("Terminals table ready.");
-            }
-            // Call callback after both tables are attempted
-            callback();
+        `);
+
+        // Migration helper: Ensure terminal_id exists in diagnostics
+        db.run("ALTER TABLE diagnostics ADD COLUMN terminal_id TEXT", (err) => {
+            // Ignore "duplicate column" errors
         });
+
+        // Final check: If the code still tries to use device_id somewhere, let's add it too
+        db.run("ALTER TABLE diagnostics ADD COLUMN device_id TEXT", (err) => {
+            // Ignore "duplicate column" errors
+        });
+
+        console.log("Database initialized and migrations checked.");
+        if (callback) callback();
     });
 }
 

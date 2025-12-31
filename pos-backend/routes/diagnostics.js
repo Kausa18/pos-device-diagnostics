@@ -20,9 +20,9 @@ router.post("/", (req, res) => {
 
     const status = computeSummaryStatus(payload);
 
-    // Auto-register/update terminal
+    // Auto-register/update terminal using UPSERT pattern
     db.run(`
-        INSERT OR REPLACE INTO terminals (
+        INSERT INTO terminals (
             terminal_id,
             manufacturer,
             model,
@@ -31,6 +31,12 @@ router.post("/", (req, res) => {
             last_seen
         )
         VALUES (?, ?, ?, ?, ?, ?)
+        ON CONFLICT(terminal_id) DO UPDATE SET
+            manufacturer = excluded.manufacturer,
+            model = excluded.model,
+            android_version = excluded.android_version,
+            sdk_level = excluded.sdk_level,
+            last_seen = excluded.last_seen
     `, [
         payload.terminal_id,
         payload.manufacturer || 'Unknown',

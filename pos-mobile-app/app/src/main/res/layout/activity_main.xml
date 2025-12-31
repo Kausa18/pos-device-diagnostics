@@ -1,49 +1,179 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="20dp"
-    android:gravity="top">
+    android:background="@color/background">
 
-    <TextView
-        android:id="@+id/titleText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Feitian Diagnostics"
-        android:textSize="26sp"
-        android:textStyle="bold"
-        android:layout_gravity="center_horizontal"
-        android:paddingBottom="20dp" />
-
-    <Button
-        android:id="@+id/btnRunDiagnostics"
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Run Diagnostics"
-        android:padding="12dp" />
+        android:background="@color/background"
+        app:elevation="0dp">
 
-    <TextView
-        android:id="@+id/statusLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Status: Waiting"
-        android:textSize="18sp"
-        android:paddingTop="20dp" />
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:title="Diagnostics"
+            app:titleCentered="true"
+            app:titleTextColor="@color/text_primary" />
+    </com.google.android.material.appbar.AppBarLayout>
 
-    <ScrollView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="20dp">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <TextView
-            android:id="@+id/outputLog"
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Top Status Card -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="24dp">
+
+                    <FrameLayout
+                        android:layout_width="160dp"
+                        android:layout_height="160dp">
+
+                        <ProgressBar
+                            android:id="@+id/diagnosticsProgress"
+                            style="?android:attr/progressBarStyleHorizontal"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:indeterminate="false"
+                            android:max="100"
+                            android:progress="0"
+                            android:progressDrawable="@drawable/circular_progress" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/testCountText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textColor="@color/brand_blue"
+                                android:textSize="32sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="/11"
+                                android:textColor="@color/text_secondary"
+                                android:textSize="14sp" />
+                        </LinearLayout>
+                    </FrameLayout>
+
+                    <TextView
+                        android:id="@+id/statusLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="Ready to test"
+                        android:textColor="@color/text_primary"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="24dp"
+                    android:text="You can test a function individually by tapping its icon."
+                    android:textColor="@color/text_secondary"
+                    android:textSize="14sp" />
+
+                <!-- Grid of Tests -->
+                <GridLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:paddingHorizontal="16dp"
+                    android:columnCount="4"
+                    android:alignmentMode="alignMargins"
+                    android:layout_gravity="center_horizontal">
+
+                    <include layout="@layout/item_diagnostic_icon" android:id="@+id/btnDeviceInfo" />
+                    <include layout="@layout/item_diagnostic_icon" android:id="@+id/btnBattery" />
+                    <include layout="@layout/item_diagnostic_icon" android:id="@+id/btnNetwork" />
+                    <include layout="@layout/item_diagnostic_icon" android:id="@+id/btnSignal" />
+                    <include layout="@layout/item_diagnostic_icon" android:id="@+id/btnStorage" />
+                    <include layout="@layout/item_diagnostic_icon" android:id="@+id/btnPrinter" />
+                    <include layout="@layout/item_diagnostic_icon" android:id="@+id/btnLedBuzzer" />
+                    <include layout="@layout/item_diagnostic_icon" android:id="@+id/btnIcCard" />
+                    <include layout="@layout/item_diagnostic_icon" android:id="@+id/btnNfcTap" />
+                    <include layout="@layout/item_diagnostic_icon" android:id="@+id/btnTouchscreen" />
+                    <include layout="@layout/item_diagnostic_icon" android:id="@+id/btnCharging" />
+                    <include layout="@layout/item_diagnostic_icon" android:id="@+id/btnViewHistory" />
+
+                </GridLayout>
+
+                <!-- Technical Output Log (Hidden/Minimized for cleaner look) -->
+                <TextView
+                    android:id="@+id/outputLog"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="24dp"
+                    android:background="#F1F3F4"
+                    android:padding="12dp"
+                    android:fontFamily="monospace"
+                    android:text="> System standby"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="11sp" />
+
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+
+        <!-- Bottom Action -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="No logs yet..."
-            android:padding="10dp"
-            android:background="#EEEEEE" />
-    </ScrollView>
+            android:padding="24dp"
+            android:background="@color/background">
 
-</LinearLayout>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRunAll"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="Start all tests"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                app:cornerRadius="28dp"
+                android:backgroundTint="@color/brand_blue" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btnPrintReceipt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="32dp"
+        android:visibility="gone"
+        app:srcCompat="@android:drawable/ic_menu_save"
+        app:backgroundTint="@color/brand_blue"
+        app:tint="@color/white" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

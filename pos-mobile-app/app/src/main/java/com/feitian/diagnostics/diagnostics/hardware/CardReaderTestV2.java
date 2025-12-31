@@ -4,20 +4,63 @@ import android.content.Context;
 import com.feitian.diagnostics.diagnostics.DiagnosticResult;
 import com.feitian.diagnostics.diagnostics.DiagnosticStatus;
 import com.feitian.diagnostics.diagnostics.DiagnosticTest;
+import com.ftpos.library.smartpos.icreader.IcReader;
+import com.ftpos.library.smartpos.icreader.OnIcReaderCallback;
 
-public class CardReaderTestV2 implements DiagnosticTest {
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
-    @Override
-    public String getName() {
-        return "Card Reader Test";
+public class CardReaderTestV2 {
+
+    public static class IcReaderTest implements DiagnosticTest {
+        @Override
+        public String getName() {
+            return "IC Card Test";
+        }
+
+        @Override
+        public DiagnosticResult run(Context context) {
+            final CountDownLatch latch = new CountDownLatch(1);
+            final DiagnosticResult[] result = new DiagnosticResult[1];
+            
+            IcReader icReader = null;
+            try {
+                icReader = IcReader.getInstance(context);
+                if (icReader == null) {
+                    return new DiagnosticResult(getName(), DiagnosticStatus.FAIL, "IC Reader SDK unavailable");
+                }
+
+                icReader.openCard(10, new OnIcReaderCallback() {
+                    @Override
+                    public void onCardATR(byte[] bytes) {
+                        result[0] = new DiagnosticResult(getName(), DiagnosticStatus.PASS, "Card Inserted (ATR Detected)");
+                        latch.countDown();
+                    }
+
+                    @Override
+                    public void onError(int i) {
+                        result[0] = new DiagnosticResult(getName(), DiagnosticStatus.FAIL, "No card detected or error: " + i);
+                        latch.countDown();
+                    }
+                });
+
+                // Correctly handling the result of await() to handle timeouts
+                if (!latch.await(11, TimeUnit.SECONDS)) {
+                    icReader.cancel();
+                    return new DiagnosticResult(getName(), DiagnosticStatus.FAIL, "Test Timeout (11s)");
+                }
+                
+                return result[0];
+            } catch (Exception e) {
+                if (icReader != null) {
+                    try { icReader.cancel(); } catch (Exception ignored) {}
+                }
+                return new DiagnosticResult(getName(), DiagnosticStatus.FAIL, "Error: " + e.getMessage());
+            }
+        }
     }
 
-    @Override
-    public DiagnosticResult run(Context context) {
-        return new DiagnosticResult(
-                getName(),
-                DiagnosticStatus.SKIPPED,
-                "Card reader hardware locked by POS firmware."
-        );
+    public static String getIcPrompt() {
+        return "\nIC Card Test:\nPlease INSERT a chip card now (10s timeout)...\n";
     }
 }

@@ -9,8 +9,10 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.NFC" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 
     <application
+        android:name=".MainApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -21,6 +23,7 @@
         android:usesCleartextTraffic="true"
         android:networkSecurityConfig="@xml/network_security_config"
         android:theme="@style/Theme.FeitianDiagnostics">
+        
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -30,6 +33,21 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".HistoryActivity" />
+        <activity android:name=".TestDetailActivity" />
+        <activity android:name=".DiagnosticsFlowActivity" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
     </application>
 
 </manifest>
