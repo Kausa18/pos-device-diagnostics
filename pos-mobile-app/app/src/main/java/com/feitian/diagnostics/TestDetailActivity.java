@@ -10,6 +10,7 @@ import androidx.core.content.ContextCompat;
 
 import com.feitian.diagnostics.diagnostics.DiagnosticResult;
 import com.feitian.diagnostics.diagnostics.DiagnosticStatus;
+import com.feitian.diagnostics.diagnostics.DiagnosticsPayloadBuilder;
 import com.feitian.diagnostics.diagnostics.hardware.PrinterHelper;
 import com.google.android.material.button.MaterialButton;
 
@@ -43,9 +44,12 @@ public class TestDetailActivity extends AppCompatActivity {
         if ("Printer Test".equalsIgnoreCase(name)) {
             btnPrintTestReceipt.setVisibility(View.VISIBLE);
             btnPrintTestReceipt.setOnClickListener(v -> {
+                // Fetch actual device serial number for the Terminal ID field
+                String serial = DiagnosticsPayloadBuilder.getDeviceSerialNumber(getApplicationContext());
+                
                 // Generate a mini receipt for just this test
                 DiagnosticResult singleResult = new DiagnosticResult(name, DiagnosticStatus.valueOf(status), details);
-                PrinterHelper.printReceipt(getApplicationContext(), Collections.singletonList(singleResult), "Single Test");
+                PrinterHelper.printReceipt(getApplicationContext(), Collections.singletonList(singleResult), serial);
             });
         } else {
             btnPrintTestReceipt.setVisibility(View.GONE);

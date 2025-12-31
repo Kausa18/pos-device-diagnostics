@@ -30,7 +30,7 @@ public class PrinterTestV2 implements DiagnosticTest {
             int status = printer.getStatus(printStatus);
 
             if (status == 0) {
-                return new DiagnosticResult(getName(), DiagnosticStatus.PASS, "Printer ready (status=0)");
+                return new DiagnosticResult(getName(), DiagnosticStatus.PASS, "Printer ready");
             } else if (status == 240) {
                 return new DiagnosticResult(getName(), DiagnosticStatus.WARNING, "Printer out of paper (code=240)");
             } else {

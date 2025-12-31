@@ -57,7 +57,7 @@ public class DiagnosticsPayloadBuilder {
     }
 
     @SuppressLint("HardwareIds")
-    private static String getDeviceSerialNumber(Context context) {
+    public static String getDeviceSerialNumber(Context context) {
         String serial = null;
 
         // 1. Try Feitian SDK Hardware Serial (Highest Priority for POS)
