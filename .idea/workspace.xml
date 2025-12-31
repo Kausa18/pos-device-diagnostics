@@ -5,17 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="576af655-ec59-4174-a2c9-2ff531e41a04" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pos-backend/db.js" beforeDir="false" afterPath="$PROJECT_DIR$/pos-backend/db.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pos-backend/diagnostics.db" beforeDir="false" afterPath="$PROJECT_DIR$/pos-backend/diagnostics.db" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pos-backend/routes/diagnostics.js" beforeDir="false" afterPath="$PROJECT_DIR$/pos-backend/routes/diagnostics.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pos-backend/routes/terminal.js" beforeDir="false" afterPath="$PROJECT_DIR$/pos-backend/routes/terminal.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pos-backend/public/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/pos-backend/public/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pos-dashboard/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/pos-dashboard/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pos-mobile-app/app/src/main/java/com/feitian/diagnostics/MainActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/pos-mobile-app/app/src/main/java/com/feitian/diagnostics/MainActivity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pos-mobile-app/app/src/main/java/com/feitian/network/DiagnosticsApiClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/pos-mobile-app/app/src/main/java/com/feitian/network/DiagnosticsApiClient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pos-mobile-app/app/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pos-mobile-app/app/src/main/res/values/strings.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

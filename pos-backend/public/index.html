@@ -2,102 +2,77 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>POS Diagnostics Dashboard</title>
+    <title>Terminal Details - POS Diagnostics</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        .card {
-            border: 1px solid #ccc;
-            padding: 12px;
-            margin-bottom: 12px;
-            border-radius: 6px;
-        }
-        pre {
-            background: #f4f4f4;
-            padding: 10px;
-            overflow-x: auto;
-        }
-        .pass {
-            color: green;
-            font-weight: bold;
-        }
-        .fail {
-            color: red;
-            font-weight: bold;
-        }
-        .skipped {
-            color: orange;
-            font-weight: bold;
-        }
-        ul {
-            list-style-type: none;
-            padding-left: 0;
-        }
-        li {
-            margin-bottom: 4px;
-        }
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 20px; background: #f9f9f9; }
+        .nav { margin-bottom: 20px; }
+        .card { background: white; border: 1px solid #ddd; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .pass { color: #28a745; font-weight: bold; }
+        .fail { color: #dc3545; font-weight: bold; }
+        .skipped { color: #fd7e14; font-weight: bold; }
+        pre { background: #f4f4f4; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 0.9em; }
+        h1, h2 { color: #333; }
+        ul { list-style: none; padding: 0; }
+        li { padding: 8px 0; border-bottom: 1px hide #eee; }
     </style>
 </head>
 <body>
 
-<h1>POS Diagnostics Dashboard</h1>
+<div class="nav">
+    <a href="http://localhost:4000/dashboard.html">← Back to Main Dashboard</a>
+</div>
 
-<div id="list">Loading…</div>
+<div id="content">
+    <h1>Terminal Detail View</h1>
+    <div id="list">Loading details...</div>
+</div>
 
 <script>
-const urlParams = new URLSearchParams(window.location.search);
-const terminal_id = urlParams.get('terminal_id');
+    const urlParams = new URLSearchParams(window.location.search);
+    const terminalId = urlParams.get('terminal_id');
 
-fetch("/diagnostics" + (terminal_id ? `?terminal_id=${terminal_id}` : ""))
-    .then(res => res.json())
-    .then(data => {
-        const list = document.getElementById("list");
+    if (!terminalId) {
+        document.getElementById("list").innerHTML = "<h3>Error: No Terminal ID specified.</h3><p>Please select a device from the main dashboard.</p>";
+    } else {
+        fetch(`/diagnostics?terminal_id=${terminalId}`)
+            .then(res => res.json())
+            .then(data => {
+                const list = document.getElementById("list");
+                if (data.length === 0) {
+                    list.innerHTML = `<p>No diagnostic history found for <strong>${terminalId}</strong>.</p>`;
+                    return;
+                }
 
-        if (data.length === 0) {
-            list.innerHTML = terminal_id ? `<p>No diagnostics found for terminal: ${terminal_id}</p>` : "<p>No diagnostics uploaded yet.</p>";
-            return;
-        }
+                list.innerHTML = `<h2>History for: ${terminalId}</h2>`;
 
-        list.innerHTML = terminal_id ? `<h2>Diagnostics for Terminal: ${terminal_id}</h2>` : "<h2>All Diagnostics</h2>";
-
-        data.reverse().forEach(item => {
-            const div = document.createElement("div");
-            div.className = "card";
-            
-            let resultsHtml = '';
-            if (item.payload.results && Array.isArray(item.payload.results)) {
-                resultsHtml = '<h4>Diagnostic Results:</h4><ul>';
-                item.payload.results.forEach(result => {
-                    const statusClass = result.status === 'PASS' ? 'pass' : result.status === 'FAIL' ? 'fail' : 'skipped';
-                    resultsHtml += `<li class="${statusClass}"><strong>${result.name}:</strong> ${result.status}`;
-                    if (result.details) {
-                        resultsHtml += ` - ${result.details}`;
-                    }
-                    resultsHtml += '</li>';
+                data.forEach(item => {
+                    const div = document.createElement("div");
+                    div.className = "card";
+                    
+                    let resultsHtml = '<h4>Test Results:</h4><ul>';
+                    item.payload.results.forEach(result => {
+                        const statusClass = result.status.toLowerCase();
+                        resultsHtml += `<li class="${statusClass}"><strong>${result.name}:</strong> ${result.status} - ${result.details}</li>`;
+                    });
+                    resultsHtml += '</ul>';
+                    
+                    div.innerHTML = `
+                        <strong>Received:</strong> ${new Date(item.receivedAt).toLocaleString()}<br/>
+                        <strong>Status:</strong> <span class="${item.summaryStatus}">${item.summaryStatus.toUpperCase()}</span><br/>
+                        <strong>Device:</strong> ${item.payload.manufacturer} ${item.payload.model}<br/>
+                        ${resultsHtml}
+                        <details>
+                            <summary>View Raw JSON</summary>
+                            <pre>${JSON.stringify(item.payload, null, 2)}</pre>
+                        </details>
+                    `;
+                    list.appendChild(div);
                 });
-                resultsHtml += '</ul>';
-            }
-            
-            div.innerHTML = `
-                <strong>Terminal ID:</strong> ${item.payload.terminal_id}<br/>
-                <strong>Status:</strong> <span class="${item.summaryStatus === 'pass' ? 'pass' : 'fail'}">${item.summaryStatus}</span><br/>
-                <strong>Received:</strong> ${item.receivedAt}<br/>
-                <strong>Device:</strong> ${item.payload.manufacturer} ${item.payload.model} (Android ${item.payload.androidVersion})<br/>
-                ${resultsHtml}
-                <details>
-                    <summary>Raw Data</summary>
-                    <pre>${JSON.stringify(item.payload, null, 2)}</pre>
-                </details>
-            `;
-            list.appendChild(div);
-        });
-    })
-    .catch(() => {
-        document.getElementById("list").innerText = "Failed to load diagnostics";
-    });
+            })
+            .catch(err => {
+                document.getElementById("list").innerText = "Failed to load data.";
+            });
+    }
 </script>
-
 </body>
 </html>

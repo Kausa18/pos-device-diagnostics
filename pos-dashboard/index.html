@@ -1,136 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>POS Device Diagnostics Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS Diagnostics - Master Dashboard</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background: #f5f5f5;
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background-color: #f4f7f6; }
+        .container { max-width: 1200px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; text-align: center; }
+        
+        .controls { margin-bottom: 25px; display: flex; gap: 15px; flex-wrap: wrap; justify-content: space-between; align-items: center; }
+        .search-box { flex-grow: 1; min-width: 300px; }
+        input, select { padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        input { width: 100%; box-sizing: border-box; }
 
-        header {
-            background: #1e88e5;
-            color: white;
-            padding: 20px;
-            font-size: 24px;
-            text-align: center;
-        }
-
-        .container {
-            padding: 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        table, th, td {
-            border: 1px solid #ccc;
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: left;
-        }
-
-        th {
-            background: #eeeeee;
-        }
-
-        .status-pass {
-            color: green;
-            font-weight: bold;
-        }
-
-        .status-fail {
-            color: red;
-            font-weight: bold;
-        }
-
-        .filter-bar {
-            margin-top: 10px;
-        }
-
-            .filter-bar input {
-                padding: 8px;
-                width: 200px;
-                margin-right: 10px;
-            }
-
-            .filter-bar button {
-                padding: 8px 12px;
-            }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f8f9fa; color: #555; cursor: pointer; text-transform: uppercase; font-size: 12px; letter-spacing: 1px; }
+        th:hover { background: #e9ecef; }
+        
+        tr:hover { background-color: #fdfdfd; }
+        
+        .status-pass { color: #1e7e34; background: #d4edda; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 12px; display: inline-block; }
+        .status-fail { color: #bd2130; background: #f8d7da; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 12px; display: inline-block; }
+        
+        .view-btn { background: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; transition: 0.2s; }
+        .view-btn:hover { background: #0056b3; }
+        
+        .no-results { text-align: center; padding: 40px; color: #999; }
     </style>
 </head>
 <body>
-    <header>POS Device Diagnostics Dashboard</header>
 
-    <div class="container">
-        <h2>Diagnostics Records</h2>
+<div class="container">
+    <h1>POS Diagnostics Fleet</h1>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Terminal ID</th>
-                    <th>Status</th>
-                    <th>Received At</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="diagTable"></tbody>
-        </table>
+    <div class="controls">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="🔍 Search by Terminal ID, Model, or Manufacturer..." onkeyup="processData()">
+        </div>
+        <div>
+            <select id="statusFilter" onchange="processData()">
+                <option value="all">All Statuses</option>
+                <option value="pass">Pass Only</option>
+                <option value="fail">Fail Only</option>
+            </select>
+            <select id="sortOrder" onchange="processData()">
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="id">Terminal ID</option>
+            </select>
+        </div>
     </div>
 
-    <script>
-        async function loadDiagnostics() {
-            try {
-                const response = await fetch("http://localhost:4000/diagnostics", {
-                    headers: {
-                        "x-api-key": "supersecret123",  
-                        "Content-Type": "application/json"
-                    }
-                });
+    <table id="diagTable">
+        <thead>
+            <tr>
+                <th>Terminal ID</th>
+                <th>Manufacturer</th>
+                <th>Model</th>
+                <th>Status</th>
+                <th>Last Upload</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <!-- Data injected here -->
+        </tbody>
+    </table>
+    <div id="noResults" class="no-results" style="display:none;">No matching records found.</div>
+</div>
 
-                if (!response.ok) {
-                    throw new Error(`Server Error: ${response.status}`);
-                }
+<script>
+    let rawData = [];
 
-                const data = await response.json();
+    async function loadData() {
+        try {
+            const response = await fetch("http://localhost:4000/diagnostics", {
+                headers: { "x-api-key": "supersecret123" }
+            });
+            rawData = await response.json();
+            processData();
+        } catch (err) {
+            console.error("Fetch error:", err);
+            document.getElementById("tableBody").innerHTML = "<tr><td colspan='6' style='color:red; text-align:center;'>Unable to connect to backend server.</td></tr>";
+        }
+    }
 
-                const tbody = document.getElementById("diagTable");
-                tbody.innerHTML = "";
+    function processData() {
+        const searchText = document.getElementById("searchInput").value.toLowerCase();
+        const statusFilter = document.getElementById("statusFilter").value;
+        const sortOrder = document.getElementById("sortOrder").value;
 
-                data.forEach((row, index) => {
-                    tbody.innerHTML += `
+        // Filter
+        let filtered = rawData.filter(item => {
+            const tid = (item.payload.terminal_id || "").toLowerCase();
+            const model = (item.payload.model || "").toLowerCase();
+            const mfr = (item.payload.manufacturer || "").toLowerCase();
+            
+            const matchesSearch = tid.includes(searchText) || model.includes(searchText) || mfr.includes(searchText);
+            const matchesStatus = statusFilter === "all" || item.summaryStatus === statusFilter;
+            
+            return matchesSearch && matchesStatus;
+        });
+
+        // Sort
+        if (sortOrder === "newest") {
+            filtered.sort((a, b) => new Date(b.receivedAt) - new Date(a.receivedAt));
+        } else if (sortOrder === "oldest") {
+            filtered.sort((a, b) => new Date(a.receivedAt) - new Date(b.receivedAt));
+        } else if (sortOrder === "id") {
+            filtered.sort((a, b) => (a.payload.terminal_id || "").localeCompare(b.payload.terminal_id || ""));
+        }
+
+        render(filtered);
+    }
+
+    function render(data) {
+        const tbody = document.getElementById("tableBody");
+        const noRes = document.getElementById("noResults");
+        tbody.innerHTML = "";
+
+        if (data.length === 0) {
+            noRes.style.display = "block";
+            return;
+        }
+        noRes.style.display = "none";
+
+        data.forEach(item => {
+            const date = new Date(item.receivedAt).toLocaleString();
+            const row = `
                 <tr>
-                    <td>${index + 1}</td>
-                    <td>${row.payload.terminal_id || 'N/A'}</td>
-                    <td class="${row.summaryStatus === "pass" ? "status-pass" : "status-fail"}">
-                        ${row.summaryStatus.toUpperCase()}
+                    <td><strong>${item.payload.terminal_id}</strong></td>
+                    <td>${item.payload.manufacturer}</td>
+                    <td>${item.payload.model}</td>
+                    <td>
+                        <span class="status-${item.summaryStatus}">
+                            ${item.summaryStatus.toUpperCase()}
+                        </span>
                     </td>
-                    <td>${row.receivedAt}</td>
-                    <td><button onclick='openDashboard("${row.payload.terminal_id}")'>View</button></td>
+                    <td>${date}</td>
+                    <td><button class="view-btn" onclick="viewTerminal('${item.payload.terminal_id}')">View History</button></td>
                 </tr>
             `;
-                });
+            tbody.innerHTML += row;
+        });
+    }
 
-            } catch (err) {
-                console.error("Failed to load diagnostics:", err);
-            }
-        }
+    function viewTerminal(tid) {
+        // Redirects to the card-view page for this specific terminal
+        window.location.href = `http://localhost:4000/index.html?terminal_id=${tid}`;
+    }
 
-        function openDashboard(terminalId) {
-            window.location.href = `http://localhost:4000/?terminal_id=${terminalId}`;
-        }
+    // Refresh every 30 seconds
+    setInterval(loadData, 30000);
+    loadData();
+</script>
 
-        loadDiagnostics();
-    </script>
 </body>
 </html>
