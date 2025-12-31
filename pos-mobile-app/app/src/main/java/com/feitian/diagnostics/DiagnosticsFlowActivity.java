@@ -34,8 +34,10 @@ public class DiagnosticsFlowActivity extends AppCompatActivity implements Diagno
     private ProgressBar diagnosticsProgress;
     private TextView testCountText;
     private TextView currentTestLabel;
-    private TextView promptText;
-    private TextView countdownTimer;
+    private TextView leftToTestText;
+    private View actionOverlay;
+    private TextView overlayPromptText;
+    private TextView overlayTimerText;
     private TextView completionStatus;
     private MaterialButton btnDone;
     private MaterialButton btnPrintReceipt;
@@ -52,8 +54,12 @@ public class DiagnosticsFlowActivity extends AppCompatActivity implements Diagno
         diagnosticsProgress = findViewById(R.id.diagnosticsProgress);
         testCountText = findViewById(R.id.testCountText);
         currentTestLabel = findViewById(R.id.currentTestLabel);
-        promptText = findViewById(R.id.promptText);
-        countdownTimer = findViewById(R.id.countdownTimer);
+        leftToTestText = findViewById(R.id.leftToTestText);
+        
+        actionOverlay = findViewById(R.id.actionOverlay);
+        overlayPromptText = findViewById(R.id.overlayPromptText);
+        overlayTimerText = findViewById(R.id.overlayTimerText);
+        
         completionStatus = findViewById(R.id.completionStatus);
         btnDone = findViewById(R.id.btnDone);
         btnPrintReceipt = findViewById(R.id.btnPrintReceipt);
@@ -76,46 +82,50 @@ public class DiagnosticsFlowActivity extends AppCompatActivity implements Diagno
     public void onTestStarted(String testName) {
         runOnUiThread(() -> {
             currentTestLabel.setText(testName);
-            cancelTimer(); // Clear any previous timer
+            cancelTimer();
             
-            // Show prompts and timers for interactive tests
+            String prompt = "";
+            int timeout = 0; // Initialize to 0 to avoid redundant assignment warnings
+
             switch (testName) {
                 case "Touchscreen Test":
-                    promptText.setText(TouchscreenTestV2.getPrompt());
-                    startCountdown(5); // 5s for touch
+                    prompt = TouchscreenTestV2.getPrompt();
+                    timeout = 5;
                     break;
                 case "NFC Tap Test":
-                    promptText.setText(NfcTestV2.getPrompt());
-                    startCountdown(10); // 10s for nfc
+                    prompt = NfcTestV2.getPrompt();
+                    timeout = 10;
                     break;
                 case "IC Card Test":
-                    promptText.setText(CardReaderTestV2.getIcPrompt());
-                    startCountdown(10); // 10s for ic
+                    prompt = CardReaderTestV2.getIcPrompt();
+                    timeout = 10;
                     break;
                 case "Charging Port Test":
-                    promptText.setText(ChargingPortTestV2.getPrompt());
-                    startCountdown(10); // 10s for charging
+                    prompt = ChargingPortTestV2.getPrompt();
+                    timeout = 10;
                     break;
-                default:
-                    promptText.setText("");
-                    countdownTimer.setVisibility(View.GONE);
-                    break;
+            }
+
+            if (timeout > 0) {
+                overlayPromptText.setText(prompt);
+                actionOverlay.setVisibility(View.VISIBLE);
+                startCountdown(timeout);
+            } else {
+                actionOverlay.setVisibility(View.GONE);
             }
         });
     }
 
     private void startCountdown(int seconds) {
-        countdownTimer.setVisibility(View.VISIBLE);
         currentTimer = new CountDownTimer(seconds * 1000L, 100) {
             @Override
             public void onTick(long millisUntilFinished) {
-                // Use Locale.US for decimal points consistency
-                countdownTimer.setText(String.format(Locale.US, "%.1fs", millisUntilFinished / 1000.0));
+                overlayTimerText.setText(String.format(Locale.US, "%.1fs", millisUntilFinished / 1000.0));
             }
 
             @Override
             public void onFinish() {
-                countdownTimer.setText(R.string.countdown_zero);
+                overlayTimerText.setText(R.string.countdown_zero);
             }
         }.start();
     }
@@ -130,11 +140,17 @@ public class DiagnosticsFlowActivity extends AppCompatActivity implements Diagno
     @Override
     public void onTestFinished(DiagnosticResult result) {
         runOnUiThread(() -> {
-            cancelTimer(); // Stop timer as soon as action is detected
-            countdownTimer.setVisibility(View.GONE);
+            cancelTimer();
+            actionOverlay.setVisibility(View.GONE);
+            
             completedCount++;
             testCountText.setText(String.valueOf(completedCount));
+            
+            // Progress Bar Logic: Matches the 0-100 percentage scale
             diagnosticsProgress.setProgress((completedCount * 100) / 11);
+            
+            int left = 11 - completedCount;
+            leftToTestText.setText(getString(R.string.left_to_test_template, left));
         });
     }
 
@@ -143,9 +159,9 @@ public class DiagnosticsFlowActivity extends AppCompatActivity implements Diagno
         this.latestResults = results;
         runOnUiThread(() -> {
             cancelTimer();
-            countdownTimer.setVisibility(View.GONE);
+            actionOverlay.setVisibility(View.GONE);
             currentTestLabel.setText(R.string.all_tests_complete);
-            promptText.setText("");
+            leftToTestText.setText(R.string.status_test_complete);
             completionStatus.setVisibility(View.VISIBLE);
             completionStatus.setText(R.string.finalizing_report);
             btnDone.setVisibility(View.VISIBLE);

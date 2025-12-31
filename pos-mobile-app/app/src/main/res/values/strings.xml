@@ -1,11 +1,11 @@
 <resources>
     <string name="app_name">Izyane Diagnostics</string>
-    <string name="status_running_diagnostics">Status: Running diagnostics...</string>
-    <string name="starting_diagnostics">Starting diagnostics...\n</string>
+    <string name="status_running_diagnostics">Status: Running diagnostics…</string>
+    <string name="starting_diagnostics">Starting diagnostics…\n</string>
     <string name="test_1_passed">Test 1: Passed\n</string>
     <string name="test_2_passed">Test 2: Passed\n</string>
     <string name="status_diagnostics_complete">Status: Diagnostics complete</string>
-    <string name="status_uploading">Status: Uploading results...</string>
+    <string name="status_uploading">Status: Uploading results…</string>
     <string name="status_upload_successful">Status: Upload successful</string>
     <string name="status_upload_failed">Status: Upload failed</string>
     <string name="upload_success">\nUpload: SUCCESS\n</string>
@@ -19,8 +19,45 @@
     <string name="no_history_data">No data available yet.</string>
     <string name="no_history_records_found">No records found for filter: %1$s</string>
     <string name="all_tests_complete">All Tests Complete</string>
-    <string name="finalizing_report">Finalizing report...</string>
+    <string name="finalizing_report">Finalizing report…</string>
     <string name="upload_successful">Upload Successful</string>
     <string name="upload_failed_with_reason">Upload Failed: %1$s</string>
     <string name="countdown_zero">0.0s</string>
+    <string name="initial_test_count">0</string>
+
+    <!-- UI Templates -->
+    <string name="test_count_template">/%1$d</string>
+    <string name="of_total_tests_template">OF %1$d TESTS</string>
+    <string name="countdown_format">%1$.1fs</string>
+    <string name="total_test_count_static">/11</string>
+    <string name="of_11_tests_static">OF 11 TESTS</string>
+    <string name="left_to_test_template">%1$d left to test</string>
+
+    <!-- UI Labels -->
+    <string name="running_diagnostics_title">Running Diagnostics</string>
+    <string name="initializing">Initializing…</string>
+    <string name="print_receipt">Print Receipt</string>
+    <string name="back_to_dashboard">Back to Dashboard</string>
+    <string name="diagnostics_title">Diagnostics</string>
+    <string name="test_individually_hint">You can test a function individually by tapping its icon.</string>
+    <string name="start_all_tests">Start all tests</string>
+    <string name="test_name_placeholder">Test Name</string>
+    <string name="diagnosis_detail_title">Diagnosis Detail</string>
+    <string name="battery_status_placeholder">Battery status</string>
+    <string name="normal_status_placeholder">Normal</string>
+    <string name="battery_details_placeholder">Life: Good\nCapacity: 3100 mAh</string>
+    <string name="print_test_receipt">Print Test Receipt</string>
+    <string name="retry">Retry</string>
+    <string name="diagnostic_history_title">Diagnostic History</string>
+    <string name="loading_stats">Loading stats…</string>
+    <string name="filter_all">All</string>
+    <string name="filter_pass">Pass</string>
+    <string name="filter_fail">Fail</string>
+    <string name="searching_history">Searching history…</string>
+    <string name="back">Back</string>
+    <string name="export_csv">Export CSV</string>
+    <string name="system_standby_log">> System standby</string>
+    <string name="history_label">History</string>
+    <string name="action_required">Action Required</string>
+    <string name="continue_testing">Continue Testing</string>
 </resources>

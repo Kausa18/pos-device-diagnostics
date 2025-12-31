@@ -22,7 +22,8 @@
             android:layout_height="32dp"
             android:layout_gravity="center"
             android:src="@android:drawable/ic_dialog_info"
-            app:tint="@color/icon_inactive" />
+            app:tint="@color/icon_inactive"
+            android:contentDescription="@null" />
 
         <ImageView
             android:id="@+id/statusCheck"
@@ -31,7 +32,8 @@
             android:layout_gravity="bottom|end"
             android:src="@android:drawable/checkbox_on_background"
             android:visibility="gone"
-            app:tint="@color/brand_blue" />
+            app:tint="@color/brand_blue"
+            android:contentDescription="@null" />
     </FrameLayout>
 
     <TextView
@@ -42,7 +44,7 @@
         android:ellipsize="end"
         android:gravity="center"
         android:maxLines="2"
-        android:text="Test Name"
+        android:text="@string/test_name_placeholder"
         android:textColor="@color/text_primary"
         android:textSize="11sp" />
 

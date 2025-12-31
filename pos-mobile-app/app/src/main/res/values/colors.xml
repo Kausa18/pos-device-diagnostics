@@ -10,16 +10,21 @@
     <color name="background">#FAFAFA</color>
     <color name="surface">#FFFFFF</color>
     
+    <!-- Standard Status Colors -->
     <color name="status_pass">#34A853</color>
     <color name="status_fail">#EA4335</color>
     <color name="status_warning">#FBBC04</color>
     <color name="status_skipped">#70757A</color>
+
+    <!-- High-Contrast Status Colors for Text (Accessibility) -->
+    <color name="status_pass_text">#1B5E20</color>
+    <color name="status_fail_text">#B71C1C</color>
     
     <color name="text_primary">#202124</color>
     <color name="text_secondary">#5F6368</color>
     <color name="divider">#DADCE0</color>
     
-    <!-- For icons/grid -->
-    <color name="icon_inactive">#BDC1C6</color>
+    <!-- For icons/grid - Darkened for better contrast -->
+    <color name="icon_inactive">#5F6368</color>
     <color name="icon_active">#1A73E8</color>
 </resources>

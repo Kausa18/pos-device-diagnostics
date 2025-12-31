@@ -14,7 +14,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:title="Diagnostic History"
+            app:title="@string/diagnostic_history_title"
             app:titleCentered="true"
             app:titleTextColor="@color/text_primary" />
     </com.google.android.material.appbar.AppBarLayout>
@@ -39,7 +39,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="16dp"
-                android:text="Loading stats..."
+                android:text="@string/loading_stats"
                 android:textSize="15sp"
                 android:textColor="@color/text_primary" />
         </com.google.android.material.card.MaterialCardView>
@@ -57,23 +57,23 @@
                 style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="All" />
+                android:text="@string/filter_all" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnFilterPass"
                 style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Pass"
-                android:textColor="@color/status_pass" />
+                android:text="@string/filter_pass"
+                android:textColor="@color/status_pass_text" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnFilterFail"
                 style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Fail"
-                android:textColor="@color/status_fail" />
+                android:text="@string/filter_fail"
+                android:textColor="@color/status_fail_text" />
         </LinearLayout>
 
         <!-- Log Content -->
@@ -97,7 +97,7 @@
                     android:layout_height="wrap_content"
                     android:padding="16dp"
                     android:fontFamily="monospace"
-                    android:text="Searching history..."
+                    android:text="@string/searching_history"
                     android:textColor="@color/text_primary"
                     android:textSize="12sp" />
             </ScrollView>
@@ -108,23 +108,22 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
+            android:gravity="center"
             android:layout_marginTop="16dp">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnBack"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="0dp"
+                android:layout_width="140dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Back"
+                android:text="@string/back"
                 android:layout_marginEnd="8dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnExportCsv"
-                android:layout_width="0dp"
+                android:layout_width="140dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Export CSV" />
+                android:text="@string/export_csv" />
         </LinearLayout>
 
     </LinearLayout>

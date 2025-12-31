@@ -16,7 +16,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:title="Diagnostics"
+            app:title="@string/diagnostics_title"
             app:titleCentered="true"
             app:titleTextColor="@color/text_primary" />
     </com.google.android.material.appbar.AppBarLayout>
@@ -64,21 +64,23 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
                             android:gravity="center"
-                            android:orientation="vertical">
+                            android:orientation="vertical"
+                            android:importantForAccessibility="no">
 
                             <TextView
                                 android:id="@+id/testCountText"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="0"
+                                android:text="@string/initial_test_count"
                                 android:textColor="@color/brand_blue"
                                 android:textSize="32sp"
                                 android:textStyle="bold" />
 
                             <TextView
+                                android:id="@+id/totalTestCountText"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="/11"
+                                android:text="@string/total_test_count_static"
                                 android:textColor="@color/text_secondary"
                                 android:textSize="14sp" />
                         </LinearLayout>
@@ -89,7 +91,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
-                        android:text="Ready to test"
+                        android:text="@string/status_test_complete"
                         android:textColor="@color/text_primary"
                         android:textSize="18sp"
                         android:textStyle="bold" />
@@ -100,7 +102,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingHorizontal="24dp"
-                    android:text="You can test a function individually by tapping its icon."
+                    android:text="@string/test_individually_hint"
                     android:textColor="@color/text_secondary"
                     android:textSize="14sp" />
 
@@ -138,7 +140,7 @@
                     android:background="#F1F3F4"
                     android:padding="12dp"
                     android:fontFamily="monospace"
-                    android:text="> System standby"
+                    android:text="@string/system_standby_log"
                     android:textColor="@color/text_secondary"
                     android:textSize="11sp" />
 
@@ -156,7 +158,7 @@
                 android:id="@+id/btnRunAll"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:text="Start all tests"
+                android:text="@string/start_all_tests"
                 android:textAllCaps="false"
                 android:textSize="16sp"
                 app:cornerRadius="28dp"
@@ -172,6 +174,7 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="32dp"
         android:visibility="gone"
+        android:contentDescription="@string/print_receipt"
         app:srcCompat="@android:drawable/ic_menu_save"
         app:backgroundTint="@color/brand_blue"
         app:tint="@color/white" />
