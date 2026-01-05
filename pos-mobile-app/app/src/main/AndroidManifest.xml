@@ -37,6 +37,7 @@
         <activity android:name=".HistoryActivity" />
         <activity android:name=".TestDetailActivity" />
         <activity android:name=".DiagnosticsFlowActivity" />
+        <activity android:name=".TouchTestActivity" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

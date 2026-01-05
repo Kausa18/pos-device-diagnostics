@@ -7,7 +7,7 @@
     <list default="true" id="576af655-ec59-4174-a2c9-2ff531e41a04" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pos-backend/public/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/pos-backend/public/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pos-dashboard/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/pos-dashboard/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pos-dashboard/index.html" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

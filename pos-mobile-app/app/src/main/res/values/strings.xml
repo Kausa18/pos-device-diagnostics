@@ -32,6 +32,7 @@
     <string name="total_test_count_static">/11</string>
     <string name="of_11_tests_static">OF 11 TESTS</string>
     <string name="left_to_test_template">%1$d left to test</string>
+    <string name="test_result_template">%1$s: %2$s</string>
 
     <!-- UI Labels -->
     <string name="running_diagnostics_title">Running Diagnostics</string>
@@ -60,4 +61,31 @@
     <string name="history_label">History</string>
     <string name="action_required">Action Required</string>
     <string name="continue_testing">Continue Testing</string>
+    <string name="touch_pad">TOUCH PAD</string>
+    <string name="tap_anywhere_to_verify">TAP ANYWHERE TO VERIFY</string>
+    <string name="tap_anywhere_to_verify_sensor">TAP ANYWHERE TO VERIFY SENSOR</string>
+    <string name="touch_timer_default">30.0s</string>
+    <string name="touch_timer_drawing">30.0s</string>
+    <string name="status_hardware_bound">System Ready: Hardware Bound</string>
+    <string name="status_hardware_binding_failed">Hardware Binding Failed: %1$d</string>
+    <string name="log_starting_test">> Starting: %1$s\n</string>
+
+    <!-- Test Labels -->
+    <string name="label_device_info">Device Info</string>
+    <string name="label_battery">Battery</string>
+    <string name="label_network">Network</string>
+    <string name="label_signal">Signal</string>
+    <string name="label_storage">Storage</string>
+    <string name="label_printer">Printer</string>
+    <string name="label_led_buzzer">LED/Buzzer</string>
+    <string name="label_ic_card">IC Card</string>
+    <string name="label_nfc_tap">NFC Tap</string>
+    <string name="label_touch">Touch</string>
+    <string name="label_charging">Charging</string>
+
+    <!-- Touch Test Specific -->
+    <string name="touch_line_test_title">TOUCH SENSOR SCAN</string>
+    <string name="draw_across_screen_hint">DRAW LINES ACROSS ENTIRE SCREEN\nVERIFY EDGES AND CORNERS</string>
+    <string name="finish_test">Finish Test</string>
+    <string name="clear_canvas">Clear Canvas</string>
 </resources>

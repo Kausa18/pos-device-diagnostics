@@ -1,6 +1,7 @@
 package com.feitian.diagnostics;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -31,6 +32,8 @@ import com.feitian.diagnostics.diagnostics.hardware.ChargingPortTestV2;
 import com.feitian.diagnostics.diagnostics.hardware.LedBuzzerTestV2;
 import com.feitian.diagnostics.diagnostics.hardware.NfcTestV2;
 import com.feitian.diagnostics.diagnostics.hardware.PrinterTestV2;
+import com.ftpos.library.smartpos.servicemanager.OnServiceConnectCallback;
+import com.ftpos.library.smartpos.servicemanager.ServiceManager;
 import com.google.android.material.button.MaterialButton;
 
 import java.util.List;
@@ -49,6 +52,9 @@ public class MainActivity extends AppCompatActivity implements DiagnosticRunner.
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
         
+        // BIND FEITIAN SERVICES ON START
+        bindHardwareService();
+
         View root = findViewById(R.id.main);
         ViewCompat.setOnApplyWindowInsetsListener(root, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -80,6 +86,22 @@ public class MainActivity extends AppCompatActivity implements DiagnosticRunner.
         });
     }
 
+    private void bindHardwareService() {
+        ServiceManager.bindPosServer(getApplicationContext(), new OnServiceConnectCallback() {
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onSuccess() {
+                runOnUiThread(() -> statusLabel.setText("System Ready"));
+            }
+
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onFail(int error) {
+                runOnUiThread(() -> statusLabel.setText("Hardware Binding Failed: " + error));
+            }
+        });
+    }
+
     private void setupGridItems() {
         configureItem(R.id.btnDeviceInfo, "Device Info", R.drawable.ic_device, new DeviceInfoTestV2());
         configureItem(R.id.btnBattery, "Battery", R.drawable.ic_battery, new BatteryTestV2());
@@ -88,13 +110,20 @@ public class MainActivity extends AppCompatActivity implements DiagnosticRunner.
         configureItem(R.id.btnStorage, "Storage", R.drawable.ic_storage, new StorageTestV2());
         configureItem(R.id.btnPrinter, "Printer", R.drawable.ic_printer, new PrinterTestV2());
         configureItem(R.id.btnLedBuzzer, "LED/Buzzer", R.drawable.ic_peripherals, new LedBuzzerTestV2());
-        configureItem(R.id.btnIcCard, "IC Card", R.drawable.ic_credit_card, new CardReaderTestV2.IcReaderTest());
-        configureItem(R.id.btnNfcTap, "NFC Tap", R.drawable.ic_nfc, new NfcTestV2());
-        configureItem(R.id.btnTouchscreen, "Touch", R.drawable.ic_touch, null);
-        configureItem(R.id.btnCharging, "Charging", R.drawable.ic_charging, new ChargingPortTestV2());
-        configureItem(R.id.btnViewHistory, "History", R.drawable.ic_history, null); // Named correctly as History
         
+        // Interactive items now launch their specific activities or states
+        configureItem(R.id.btnIcCard, "IC Card", R.drawable.ic_credit_card, null);
+        configureItem(R.id.btnNfcTap, "NFC Tap", R.drawable.ic_nfc, null);
+        configureItem(R.id.btnTouchscreen, "Touch", R.drawable.ic_touch, null);
+        configureItem(R.id.btnCharging, "Charging", R.drawable.ic_charging, null);
+        configureItem(R.id.btnViewHistory, "History", R.drawable.ic_history, null);
+
+        // Individual Click Handlers for Interactive Tests
+        findViewById(R.id.btnIcCard).setOnClickListener(v -> runSingleInteractive("IC Card Test", new CardReaderTestV2.IcReaderTest()));
+        findViewById(R.id.btnNfcTap).setOnClickListener(v -> runSingleInteractive("NFC Tap Test", new NfcTestV2()));
         findViewById(R.id.btnTouchscreen).setOnClickListener(v -> runTouchTest());
+        findViewById(R.id.btnCharging).setOnClickListener(v -> runSingleInteractive("Charging Port Test", new ChargingPortTestV2()));
+        
         findViewById(R.id.btnViewHistory).setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
             startActivity(intent);
@@ -115,6 +144,12 @@ public class MainActivity extends AppCompatActivity implements DiagnosticRunner.
         }
     }
 
+    private void runSingleInteractive(String testName, DiagnosticTest test) {
+        statusLabel.setText(getString(R.string.running_test_prefix, testName));
+        outputLog.setText("");
+        runner.runSingle(test);
+    }
+
     private void checkAndRequestPermissions() {
         String[] permissions = { Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION };
         boolean allGranted = true;
@@ -129,8 +164,14 @@ public class MainActivity extends AppCompatActivity implements DiagnosticRunner.
 
     private void runTouchTest() {
         statusLabel.setText(getString(R.string.running_test_prefix, "Touchscreen Test"));
-        outputLog.setText(TouchscreenTestV2.getPrompt());
+        outputLog.setText("");
         TouchscreenTestV2.reset();
+        
+        // Show the touch pad activity
+        Intent intent = new Intent(this, TouchTestActivity.class);
+        startActivity(intent);
+        
+        // The results will be fetched when the activity finishes via the runner or manual check
         new Thread(() -> {
             try { Thread.sleep(5000); } catch (InterruptedException ignored) {}
             DiagnosticResult res = TouchscreenTestV2.getResult();
@@ -140,13 +181,18 @@ public class MainActivity extends AppCompatActivity implements DiagnosticRunner.
 
     @Override
     public void onTestStarted(String testName) {
-        // MainActivity uses simple logging for individual tests
-        outputLog.append("> Starting: " + testName + "\n");
+        switch (testName) {
+            case "Touchscreen Test": outputLog.append(TouchscreenTestV2.getPrompt()); break;
+            case "NFC Tap Test": outputLog.append(NfcTestV2.getPrompt()); break;
+            case "IC Card Test": outputLog.append(CardReaderTestV2.getIcPrompt()); break;
+            case "Charging Port Test": outputLog.append(ChargingPortTestV2.getPrompt()); break;
+        }
     }
 
     @Override
     public void onTestFinished(DiagnosticResult result) {
         outputLog.setText(result.toString());
+        
         Intent intent = new Intent(this, TestDetailActivity.class);
         intent.putExtra("test_name", result.getName());
         intent.putExtra("test_status", result.getStatus().name());

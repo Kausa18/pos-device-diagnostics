@@ -33,7 +33,7 @@ public class DiagnosticRunner {
     public void runAll() {
         results.clear();
         new Thread(() -> {
-            // Automated
+            // 1. Automated Tests
             runSingleSync(new DeviceInfoTestV2());
             runSingleSync(new BatteryTestV2());
             runSingleSync(new NetworkTestV2());
@@ -42,18 +42,13 @@ public class DiagnosticRunner {
             runSingleSync(new PrinterTestV2());
             runSingleSync(new LedBuzzerTestV2());
 
-            // Interactive
+            // 2. Interactive Tests
             runSingleSync(new ChargingPortTestV2());
             runSingleSync(new CardReaderTestV2.IcReaderTest());
             runSingleSync(new NfcTestV2());
-
-            // Touchscreen
-            mainHandler.post(() -> listener.onTestStarted("Touchscreen Test"));
-            TouchscreenTestV2.reset();
-            try { Thread.sleep(5000); } catch (InterruptedException ignored) {}
-            DiagnosticResult touchResult = TouchscreenTestV2.getResult();
-            results.add(touchResult);
-            mainHandler.post(() -> listener.onTestFinished(touchResult));
+            
+            // 3. Touchscreen Test (Now integrated properly)
+            runSingleSync(new TouchscreenTestV2());
 
             mainHandler.post(() -> listener.onAllTestsComplete(new ArrayList<>(results)));
         }).start();
@@ -71,8 +66,8 @@ public class DiagnosticRunner {
         final String testName = test.getName();
         mainHandler.post(() -> listener.onTestStarted(testName));
         
-        // Spacing for UI visibility
-        try { Thread.sleep(300); } catch (InterruptedException ignored) {}
+        // Slight delay for UI state transition
+        try { Thread.sleep(500); } catch (InterruptedException ignored) {}
         
         final DiagnosticResult result = test.run(context);
         results.add(result);

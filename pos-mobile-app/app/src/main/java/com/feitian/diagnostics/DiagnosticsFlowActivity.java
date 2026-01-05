@@ -38,6 +38,9 @@ public class DiagnosticsFlowActivity extends AppCompatActivity implements Diagno
     private View actionOverlay;
     private TextView overlayPromptText;
     private TextView overlayTimerText;
+    private TextView touchHintText;
+    private DrawingView flowDrawingView;
+    private MaterialButton btnFinishInteractive;
     private TextView completionStatus;
     private MaterialButton btnDone;
     private MaterialButton btnPrintReceipt;
@@ -59,6 +62,9 @@ public class DiagnosticsFlowActivity extends AppCompatActivity implements Diagno
         actionOverlay = findViewById(R.id.actionOverlay);
         overlayPromptText = findViewById(R.id.overlayPromptText);
         overlayTimerText = findViewById(R.id.overlayTimerText);
+        touchHintText = findViewById(R.id.touchHintText);
+        flowDrawingView = findViewById(R.id.flowDrawingView);
+        btnFinishInteractive = findViewById(R.id.btnFinishInteractive);
         
         completionStatus = findViewById(R.id.completionStatus);
         btnDone = findViewById(R.id.btnDone);
@@ -74,6 +80,11 @@ public class DiagnosticsFlowActivity extends AppCompatActivity implements Diagno
             }
         });
 
+        btnFinishInteractive.setOnClickListener(v -> {
+            // Signal the Touch test to finish early
+            TouchscreenTestV2.stopTest();
+        });
+
         DiagnosticRunner runner = new DiagnosticRunner(getApplicationContext(), this);
         runner.runAll();
     }
@@ -85,12 +96,13 @@ public class DiagnosticsFlowActivity extends AppCompatActivity implements Diagno
             cancelTimer();
             
             String prompt = "";
-            int timeout = 0; // Initialize to 0 to avoid redundant assignment warnings
+            int timeout = 0;
+            boolean isTouchTest = "Touchscreen Test".equals(testName);
 
             switch (testName) {
                 case "Touchscreen Test":
                     prompt = TouchscreenTestV2.getPrompt();
-                    timeout = 5;
+                    timeout = 30; 
                     break;
                 case "NFC Tap Test":
                     prompt = NfcTestV2.getPrompt();
@@ -109,23 +121,42 @@ public class DiagnosticsFlowActivity extends AppCompatActivity implements Diagno
             if (timeout > 0) {
                 overlayPromptText.setText(prompt);
                 actionOverlay.setVisibility(View.VISIBLE);
-                startCountdown(timeout);
+                
+                if (isTouchTest) {
+                    flowDrawingView.setVisibility(View.VISIBLE);
+                    flowDrawingView.clear();
+                    touchHintText.setVisibility(View.VISIBLE);
+                    btnFinishInteractive.setVisibility(View.GONE); 
+                } else {
+                    flowDrawingView.setVisibility(View.GONE);
+                    touchHintText.setVisibility(View.GONE);
+                    btnFinishInteractive.setVisibility(View.GONE);
+                }
+                
+                startCountdown(timeout, isTouchTest);
             } else {
                 actionOverlay.setVisibility(View.GONE);
             }
         });
     }
 
-    private void startCountdown(int seconds) {
+    private void startCountdown(int seconds, boolean isTouchTest) {
         currentTimer = new CountDownTimer(seconds * 1000L, 100) {
             @Override
             public void onTick(long millisUntilFinished) {
                 overlayTimerText.setText(String.format(Locale.US, "%.1fs", millisUntilFinished / 1000.0));
+                
+                if (isTouchTest && millisUntilFinished < (seconds - 3) * 1000L) {
+                    btnFinishInteractive.setVisibility(View.VISIBLE);
+                }
             }
 
             @Override
             public void onFinish() {
                 overlayTimerText.setText(R.string.countdown_zero);
+                if (isTouchTest) {
+                    TouchscreenTestV2.stopTest(); // Auto-finish on timeout
+                }
             }
         }.start();
     }
@@ -142,12 +173,11 @@ public class DiagnosticsFlowActivity extends AppCompatActivity implements Diagno
         runOnUiThread(() -> {
             cancelTimer();
             actionOverlay.setVisibility(View.GONE);
+            flowDrawingView.setVisibility(View.GONE);
             
             completedCount++;
             testCountText.setText(String.valueOf(completedCount));
-            
-            // Progress Bar Logic: Matches the 0-100 percentage scale
-            diagnosticsProgress.setProgress((completedCount * 100) / 11);
+            diagnosticsProgress.setProgress(completedCount);
             
             int left = 11 - completedCount;
             leftToTestText.setText(getString(R.string.left_to_test_template, left));
