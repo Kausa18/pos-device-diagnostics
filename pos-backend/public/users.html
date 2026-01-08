@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Management - POS Diagnostics</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background: #f4f7f6; }
+        .header { background: #1e88e5; color: white; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; }
+        .container { max-width: 900px; margin: 30px auto; padding: 20px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f8f9fa; color: #666; font-size: 13px; text-transform: uppercase; }
+        .btn-approve { background: #2e7d32; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+        .btn-reject { background: #c62828; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-left: 5px; }
+        .back-link { color: white; text-decoration: none; font-weight: bold; }
+        .status-pending { color: #f9a825; font-weight: bold; }
+        .status-approved { color: #2e7d32; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <a href="/dashboard.html" class="back-link">&larr; Back to Dashboard</a>
+    <h1>User Management</h1>
+    <div style="width: 100px"></div>
+</div>
+
+<div class="container">
+    <h2>Access Requests</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Joined</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="userTable"></tbody>
+    </table>
+</div>
+
+<script>
+    const userStr = sessionStorage.getItem('user');
+    if (!userStr) window.location.href = '/login.html';
+    const user = JSON.parse(userStr);
+    if (user.role !== 'admin') window.location.href = '/dashboard.html';
+
+    async function loadUsers() {
+        const res = await fetch('/auth/users');
+        const users = await res.json();
+        const tbody = document.getElementById('userTable');
+        tbody.innerHTML = '';
+
+        users.forEach(u => {
+            if (u.username === user.username) return; // Don't manage yourself
+
+            tbody.innerHTML += `
+                <tr>
+                    <td>${u.username}</td>
+                    <td>${u.role}</td>
+                    <td class="status-${u.status}">${u.status.toUpperCase()}</td>
+                    <td>${new Date(u.created_at).toLocaleDateString()}</td>
+                    <td>
+                        ${u.status === 'pending' ? 
+                            `<button class="btn-approve" onclick="updateUser(${u.id}, 'approved')">Approve</button>` : 
+                            `<button class="btn-reject" onclick="updateUser(${u.id}, 'pending')">Revoke</button>`
+                        }
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    async function updateUser(id, status) {
+        await fetch(`/auth/users/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status })
+        });
+        loadUsers();
+    }
+
+    loadUsers();
+</script>
+
+</body>
+</html>

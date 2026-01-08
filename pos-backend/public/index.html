@@ -14,12 +14,13 @@
         h1, h2 { color: #333; }
         ul { list-style: none; padding: 0; }
         li { padding: 8px 0; border-bottom: 1px solid #eee; }
+        .back-link { text-decoration: none; font-weight: bold; color: #1e88e5; }
     </style>
 </head>
 <body>
 
 <div class="nav">
-    <a href="/dashboard.html">← Back to Main Dashboard</a>
+    <a href="/devices.html" class="back-link">← Back to Device List</a>
 </div>
 
 <div id="content">
@@ -32,7 +33,7 @@
     const terminalId = urlParams.get('terminal_id');
 
     if (!terminalId) {
-        document.getElementById("list").innerHTML = "<h3>Error: No Terminal ID specified.</h3><p>Please select a device from the main dashboard.</p>";
+        document.getElementById("list").innerHTML = "<h3>Error: No Terminal ID specified.</h3><p>Please select a device from the device list.</p>";
     } else {
         fetch(`/diagnostics?terminal_id=${terminalId}`)
             .then(res => res.json())

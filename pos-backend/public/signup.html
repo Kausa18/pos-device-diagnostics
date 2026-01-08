@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign Up - POS Diagnostics</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f0f2f5; }
+        .signup-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 350px; text-align: center; }
+        h1 { color: #1e88e5; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #2e7d32; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 10px; }
+        button:hover { background: #1b5e20; }
+        .error { color: #d32f2f; margin-top: 15px; font-size: 14px; display: none; }
+        .success { color: #2e7d32; margin-top: 15px; font-size: 14px; display: none; }
+        .footer { margin-top: 20px; font-size: 14px; }
+        .footer a { color: #1e88e5; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="signup-card">
+    <h1>Create Account</h1>
+    <p>Sign up to access the dashboard</p>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="signup()">Sign Up</button>
+    <div id="error" class="error"></div>
+    <div id="success" class="success">Account created! Please wait for admin approval.</div>
+    <div class="footer">
+        Already have an account? <a href="/login.html">Login</a>
+    </div>
+</div>
+
+<script>
+    async function signup() {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const errorDiv = document.getElementById('error');
+        const successDiv = document.getElementById('success');
+
+        errorDiv.style.display = 'none';
+        successDiv.style.display = 'none';
+
+        try {
+            const res = await fetch('/auth/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                successDiv.style.display = 'block';
+                setTimeout(() => window.location.href = '/login.html', 3000);
+            } else {
+                errorDiv.innerText = data.error;
+                errorDiv.style.display = 'block';
+            }
+        } catch (e) {
+            errorDiv.innerText = "Server error.";
+            errorDiv.style.display = 'block';
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>POS Fleet Registry - Diagnostics</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; background: #f0f2f5; color: #333; }
+        .header { background: #1e88e5; color: white; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; }
+        .container { max-width: 1300px; margin: 30px auto; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        
+        .filters { display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; }
+        .filter-pill { padding: 8px 16px; background: #e9ecef; border: 1px solid #ddd; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: 600; transition: 0.2s; }
+        .filter-pill.active { background: #1e88e5; color: white; border-color: #1e88e5; }
+        
+        .search-box { flex-grow: 1; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; }
+        th { background: #f8f9fa; color: #666; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; }
+        
+        .status-badge { padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 11px; }
+        .pass { color: #2e7d32; background: #e8f5e9; }
+        .fail { color: #c62828; background: #ffebee; }
+        .none { color: #757575; background: #f5f5f5; }
+
+        .view-link { color: #1e88e5; text-decoration: none; font-weight: bold; }
+        .back-link { color: white; text-decoration: none; font-size: 14px; }
+        .admin-btn { background: #2e7d32; color: white; padding: 8px 15px; border-radius: 8px; font-size: 12px; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <a href="/dashboard.html" class="back-link">&larr; Back to Overview</a>
+    <h1>POS Fleet Registry</h1>
+    <div id="adminControls"></div>
+</div>
+
+<div class="container">
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Search Terminal ID..." onkeyup="processData()">
+    </div>
+
+    <div class="filters">
+        <div class="filter-pill active" data-filter="all" onclick="setFilter(this)">All Devices</div>
+        <div class="filter-pill" data-filter="pass" onclick="setFilter(this)">Passed Terminals</div>
+        <div class="filter-pill" data-filter="failed" onclick="setFilter(this)">Failed Terminals</div>
+        <div class="filter-pill" data-filter="recent" onclick="setFilter(this)">Last 24 Hours</div>
+        <div class="filter-pill" data-filter="none" onclick="setFilter(this)">Not Tested</div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Terminal ID</th>
+                <th>Manufacturer</th>
+                <th>Model</th>
+                <th>Last Diagnostic</th>
+                <th>Overall Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="deviceTable"></tbody>
+    </table>
+</div>
+
+<script>
+    let rawData = [];
+    let currentFilter = 'all';
+    const API_KEY = "supersecret123";
+
+    if (sessionStorage.getItem('isAdmin') === 'true') {
+        document.getElementById('adminControls').innerHTML = '<a href="/register.html" class="admin-btn">+ REGISTER DEVICE</a>';
+    }
+
+    async function loadData() {
+        try {
+            const res = await fetch(`/terminals?api_key=${API_KEY}`);
+            if (!res.ok) throw new Error("Unauthorized");
+            rawData = await res.json();
+            processData();
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    function setFilter(el) {
+        document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+        el.classList.add('active');
+        currentFilter = el.getAttribute('data-filter');
+        processData();
+    }
+
+    function processData() {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const now = new Date();
+
+        let filtered = rawData.filter(d => {
+            const matchesSearch = d.terminal_id.toLowerCase().includes(search) || 
+                                 (d.manufacturer || "").toLowerCase().includes(search) ||
+                                 (d.model || "").toLowerCase().includes(search);
+            
+            let matchesType = true;
+            const status = d.last_status || 'none';
+
+            if (currentFilter === 'pass') matchesType = (status === 'pass');
+            if (currentFilter === 'failed') matchesType = (status === 'fail');
+            if (currentFilter === 'none') matchesType = (status === 'none');
+            if (currentFilter === 'recent') {
+                if (!d.last_diag_time) return false;
+                const diff = (now - new Date(d.last_diag_time)) / (1000 * 60 * 60);
+                matchesType = (diff <= 24);
+            }
+
+            return matchesSearch && matchesType;
+        });
+
+        render(filtered);
+    }
+
+    function render(data) {
+        const tbody = document.getElementById('deviceTable');
+        tbody.innerHTML = '';
+        data.forEach(d => {
+            const status = d.last_status || 'none';
+            tbody.innerHTML += `
+                <tr>
+                    <td><strong>${d.terminal_id}</strong></td>
+                    <td>${d.manufacturer || '-'}</td>
+                    <td>${d.model || '-'}</td>
+                    <td>${d.last_diag_time ? new Date(d.last_diag_time).toLocaleString() : 'Never'}</td>
+                    <td><span class="status-badge ${status}">${status.toUpperCase()}</span></td>
+                    <td><a href="/index.html?terminal_id=${d.terminal_id}" class="view-link">View Details</a></td>
+                </tr>
+            `;
+        });
+    }
+
+    loadData();
+</script>
+
+</body>
+</html>
