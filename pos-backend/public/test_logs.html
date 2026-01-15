@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Logs & Reports</title>
+    <style>
+        :root {
+            --primary: #1e88e5; --success: #28a745; --danger: #dc3545; --warning: #f9a825;
+            --bg: #f0f2f5; --card-bg: #ffffff; --text: #2c3e50; --text-muted: #7f8c8d;
+        }
+        body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; margin: 0; background: var(--bg); }
+        .header { background: var(--card-bg); padding: 12px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e0e0e0; }
+        .header a { color: var(--primary); text-decoration: none; font-weight: 700; }
+        .container { max-width: 1200px; margin: 20px auto; padding: 20px; background: var(--card-bg); border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h1 { color: var(--text); }
+
+        .main-table { width: 100%; border-collapse: collapse; }
+        .main-table th, .main-table td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
+        .main-table th { background: #f8f9fa; color: #666; font-size: 13px; text-transform: uppercase; }
+        
+        .btn-download { background-color: var(--primary); color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .btn-download:hover { background-color: #1565c0; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Test Logs & Reports</h1>
+    <a href="dashboard.html">&larr; Back to Dashboard</a>
+</div>
+
+<div class="container">
+    <h1>Download Device Logs</h1>
+    <p>Click the button next to any device to download its complete diagnostic history as a CSV file.</p>
+    <table class="main-table">
+        <thead>
+            <tr>
+                <th>Terminal ID</th>
+                <th>Manufacturer</th>
+                <th>Model</th>
+                <th>Last Seen</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="terminals-body"></tbody>
+    </table>
+</div>
+
+<script>
+    const API_KEY = "supersecret123";
+    let allDiagnostics = []; // Store all diagnostics to prevent re-fetching
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            // Fetch all data on page load
+            const [terminalsRes, diagsRes] = await Promise.all([
+                fetch(`/terminals?api_key=${API_KEY}`),
+                fetch(`/diagnostics?api_key=${API_KEY}`)
+            ]);
+
+            if (!terminalsRes.ok || !diagsRes.ok) throw new Error('Failed to fetch initial data.');
+
+            const terminals = await terminalsRes.json();
+            allDiagnostics = await diagsRes.json();
+            
+            renderTable(terminals);
+        } catch (error) {
+            console.error("Error loading page data:", error);
+            document.getElementById('terminals-body').innerHTML = `<tr><td colspan="5">Error loading device list.</td></tr>`;
+        }
+    });
+
+    function renderTable(terminals) {
+        const tbody = document.getElementById('terminals-body');
+        tbody.innerHTML = '';
+        if (terminals.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5">No devices found.</td></tr>';
+            return;
+        }
+
+        terminals.forEach(terminal => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><strong>${terminal.terminal_id}</strong></td>
+                <td>${terminal.manufacturer || '-'}</td>
+                <td>${terminal.model || '-'}</td>
+                <td>${new Date(terminal.last_seen).toLocaleString()}</td>
+                <td><button class="btn-download" onclick="downloadCSV('${terminal.terminal_id}')">Download CSV</button></td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    function downloadCSV(terminalId) {
+        const headers = ['Timestamp', 'Terminal ID', 'Overall Status', 'Test Name', 'Test Status', 'Test Result'];
+        let csvContent = headers.join(',') + '\r\n';
+
+        const deviceDiags = allDiagnostics.filter(diag => diag.payload.terminal_id === terminalId);
+
+        deviceDiags.forEach(diag => {
+            const timestamp = new Date(diag.receivedAt).toISOString();
+            const overallStatus = diag.summaryStatus;
+
+            if (diag.payload.results && diag.payload.results.length > 0) {
+                diag.payload.results.forEach(test => {
+                    const row = [
+                        timestamp,
+                        `"${terminalId}"`,
+                        `"${overallStatus}"`,
+                        `"${test.name}"`,
+                        `"${test.status}"`,
+                        `"${(test.result || '').replace(/\n/g, ' ')}"` // Sanitize result field
+                    ];
+                    csvContent += row.join(',') + '\r\n';
+                });
+            } else {
+                // Create a row even if there are no sub-tests
+                 const row = [ timestamp, `"${terminalId}"`, `"${overallStatus}"`, 'No Sub-tests', 'N/A', 'N/A'];
+                 csvContent += row.join(',') + '\r\n';
+            }
+        });
+
+        // Create a hidden link to trigger the download
+        const encodedUri = encodeURI("data:text/csv;charset=utf-8," + csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `log_${terminalId}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>
+
+</body>
+</html>

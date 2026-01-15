@@ -4,8 +4,27 @@
     <meta charset="UTF-8">
     <title>POS Fleet Registry - Diagnostics</title>
     <style>
+        :root {
+            --primary: #1e88e5;
+        }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; background: #f0f2f5; color: #333; }
-        .header { background: #1e88e5; color: white; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; }
+        .header { 
+            background: rgba(255, 255, 255, 0.9); 
+            backdrop-filter: blur(10px);
+            padding: 12px 40px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .brand { font-weight: 900; color: var(--primary); letter-spacing: 1px; }
+        .nav-links a { color: var(--primary); text-decoration: none; font-size: 14px; font-weight: 700; margin-left: 20px; }
+        .btn-logout { background: #f8f9fa; border: 1px solid #ddd; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.2s; }
+        .btn-logout:hover { background: #fee; color: #c00; border-color: #fcc; }
+
         .container { max-width: 1300px; margin: 30px auto; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         
         .filters { display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; }
@@ -25,16 +44,18 @@
         .none { color: #757575; background: #f5f5f5; }
 
         .view-link { color: #1e88e5; text-decoration: none; font-weight: bold; }
-        .back-link { color: white; text-decoration: none; font-size: 14px; }
-        .admin-btn { background: #2e7d32; color: white; padding: 8px 15px; border-radius: 8px; font-size: 12px; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <a href="/dashboard.html" class="back-link">&larr; Back to Overview</a>
-    <h1>POS Fleet Registry</h1>
-    <div id="adminControls"></div>
+    <div class="brand">POS.LOCAL</div>
+    <div class="nav-links">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="devices.html">Devices</a>
+        <span id="adminLinks"></span>
+        <button class="btn-logout" onclick="logout()">LOGOUT</button>
+    </div>
 </div>
 
 <div class="container">
@@ -66,13 +87,32 @@
 </div>
 
 <script>
+    // Ensure session exists
+    const userStr = sessionStorage.getItem('user');
+    if (!userStr) window.location.href = '/login.html';
+    const user = JSON.parse(userStr);
+
+    if (user.role === 'admin') {
+        document.getElementById('adminLinks').innerHTML = `<a href="/users.html">Users</a>`;
+    }
+
     let rawData = [];
     let currentFilter = 'all';
     const API_KEY = "supersecret123";
 
-    if (sessionStorage.getItem('isAdmin') === 'true') {
-        document.getElementById('adminControls').innerHTML = '<a href="/register.html" class="admin-btn">+ REGISTER DEVICE</a>';
-    }
+    document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const statusFilter = urlParams.get('status');
+        const generalFilter = urlParams.get('filter');
+        const preFilter = statusFilter || generalFilter;
+
+        if (preFilter) {
+            const filterPill = document.querySelector(`.filter-pill[data-filter='${preFilter}']`);
+            if (filterPill) setFilter(filterPill);
+        }
+
+        loadData();
+    });
 
     async function loadData() {
         try {
@@ -137,7 +177,11 @@
         });
     }
 
-    loadData();
+    function logout() {
+        sessionStorage.clear();
+        window.location.href = '/login.html';
+    }
+
 </script>
 
 </body>

@@ -2,153 +2,161 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>POS Diagnostics Fleet - Overview</title>
+    <title>Diagnostic Dashboard</title>
     <style>
         :root {
-            --primary: #1e88e5;
-            --success: #28a745;
-            --danger: #dc3545;
-            --warning: #f9a825;
-            --bg: #f0f2f5;
-            --card-bg: #ffffff;
-            --text: #2c3e50;
-            --text-muted: #7f8c8d;
+            --primary: #1e88e5; --success: #28a745; --danger: #dc3545; --warning: #f9a825;
+            --bg: #f0f2f5; --card-bg: #ffffff; --text: #2c3e50; --text-muted: #7f8c8d;
+            --sidebar-bg: #1a2a3a; --sidebar-text: #bdc3c7; --sidebar-active: #ffffff;
         }
-
-        body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; margin: 0; background: var(--bg); color: var(--text); }
+        body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; margin: 0; background: var(--bg); display: flex; }
         
-        .header { 
-            background: rgba(255, 255, 255, 0.9); 
-            backdrop-filter: blur(10px);
-            padding: 12px 40px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .container { max-width: 900px; margin: 40px auto; background: var(--card-bg); padding: 50px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); text-align: center; }
+        /* Sidebar */
+        .sidebar { width: 260px; background: var(--sidebar-bg); color: var(--sidebar-text); display: flex; flex-direction: column; height: 100vh; position: fixed; }
+        .sidebar-brand { padding: 20px; font-size: 24px; font-weight: 900; color: var(--sidebar-active); text-align: center; border-bottom: 1px solid #2c3e50; }
+        .sidebar-nav-section { font-size: 12px; text-transform: uppercase; padding: 20px 20px 10px; font-weight: 700; color: #7f8c8d; }
+        .sidebar-nav a { display: block; color: var(--sidebar-text); text-decoration: none; padding: 12px 20px; font-weight: 600; transition: 0.2s; border-left: 3px solid transparent; }
+        .sidebar-nav a:hover { background: #2c3e50; color: var(--sidebar-active); }
+        .sidebar-nav a.active { background: #2c3e50; color: var(--sidebar-active); border-left-color: var(--primary); }
         
-        h1 { font-size: 32px; font-weight: 800; margin-bottom: 8px; color: #1a2a3a; }
-        .subtitle { color: var(--text-muted); font-size: 14px; margin-bottom: 40px; }
-
-        .chart-container { position: relative; width: 280px; height: 280px; margin: 0 auto 30px; }
-        .pie-chart { width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .inner-circle { width: 65%; height: 65%; background: var(--card-bg); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        .inner-circle span { font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
-        .inner-circle strong { font-size: 36px; color: var(--text); }
-
-        .legend { display: flex; justify-content: center; gap: 30px; margin-bottom: 40px; }
-        .legend-item { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: var(--text-muted); }
-        .dot { width: 12px; height: 12px; border-radius: 50%; }
-        .dot.pass { background: var(--success); }
-        .dot.fail { background: var(--danger); }
-        .dot.none { background: var(--warning); }
-
-        .refresh-btn { background: none; border: none; color: var(--primary); cursor: pointer; font-size: 13px; font-weight: 700; margin-bottom: 40px; display: inline-flex; align-items: center; gap: 6px; }
-
-        .toolbar { border-top: 1px solid #f0f0f0; padding-top: 40px; }
-        .search-row { margin-bottom: 25px; position: relative; }
-        .search-row input { width: 100%; padding: 16px 16px 16px 45px; border: 2px solid #f0f0f0; border-radius: 12px; font-size: 15px; box-sizing: border-box; }
-        .search-icon { position: absolute; left: 18px; top: 18px; }
-
-        .button-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-        .action-btn { padding: 14px 24px; border: none; border-radius: 12px; color: white; font-weight: 700; cursor: pointer; font-size: 14px; text-decoration: none; transition: 0.3s; }
-        .btn-blue { background: var(--primary); }
-        .btn-green { background: var(--success); }
-        .btn-red { background: var(--danger); }
-        .btn-amber { background: var(--warning); }
-        .action-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-
-        .btn-logout { background: #f8f9fa; border: 1px solid #ddd; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.2s; }
+        /* Main Content */
+        .main-content { flex-grow: 1; margin-left: 260px; display: flex; flex-direction: column; }
+        .header { background: var(--card-bg); padding: 12px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e0e0e0; position: sticky; top: 0; z-index: 100; }
+        .btn-logout { background: transparent; border: 1px solid #ddd; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; }
         .btn-logout:hover { background: #fee; color: #c00; border-color: #fcc; }
         
-        .admin-link { color: var(--primary); text-decoration: none; font-size: 13px; font-weight: 800; margin-right: 20px; }
-        .brand { font-weight: 900; color: var(--primary); letter-spacing: 1px; }
+        main { padding: 20px; }
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+
+        .kpi-card { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .kpi-card .title { font-size: 14px; font-weight: 600; color: var(--text-muted); margin-bottom: 10px; }
+        .kpi-card .value { font-size: 32px; font-weight: 800; color: var(--text); }
+        .kpi-card .value .unit { font-size: 16px; font-weight: 600; color: var(--text-muted); margin-left: 5px; }
+        .kpi-card .value.critical { color: var(--danger); }
+
+        .card { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .card-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+
+        /* Chart Placeholders */
+        .chart-placeholder { width: 100%; height: 250px; background: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #ccc; font-weight: bold; }
+        .pie-chart-container { width: 100%; display: flex; justify-content: center; align-items: center; gap: 20px; }
+        .pie-chart { width: 150px; height: 150px; border-radius: 50%; background: conic-gradient(var(--success) 0 65%, var(--warning) 65% 85%, var(--danger) 85% 100%); }
+        .legend { list-style: none; padding: 0; }
+        .legend li { display: flex; align-items: center; margin-bottom: 8px; }
+        .legend .dot { width: 12px; height: 12px; border-radius: 50%; margin-right: 10px; }
+        
+        /* Activity Feed */
+        .activity-feed { list-style: none; padding: 0; margin: 0; max-height: 250px; overflow-y: auto; }
+        .activity-feed li { padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
+        .activity-feed li:last-child { border: none; }
+        .activity-feed .time { font-size: 12px; color: var(--text-muted); display: block; margin-top: 4px; }
+        .activity-feed .highlight { color: var(--danger); font-weight: bold; }
+
+        /* Data Table */
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th, .data-table td { padding: 12px; text-align: left; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
+        .data-table th { font-weight: 700; color: var(--text-muted); }
+        .status-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <div class="brand">POS.LOCAL</div>
-    <div>
-        <span id="adminLinks"></span>
-        <button class="btn-logout" onclick="logout()">LOGOUT</button>
+<div class="sidebar">
+    <div class="sidebar-brand">Diagnostic Dashbord</div>
+    <div class="sidebar-nav">
+        <div class="sidebar-nav-section">Device Management</div>
+        <a href="devices.html">Connected Devices</a>
+        <a href="#">Test Logs</a>
+        
+        <div class="sidebar-nav-section">Analytics & Reports</div>
+        <a href="#" class="active">Key Metrics</a>
+        <a href="#">Diagnostic Trends</a>
+        
+        <div class="sidebar-nav-section">Admin</div>
+        <a href="users.html" id="adminUsersLink">User Management</a>
     </div>
 </div>
 
-<div class="container">
-    <h1>Fleet Status Overview</h1>
-    <div class="subtitle">System diagnostics and operation readiness</div>
+<div class="main-content">
+    <div class="header">
+        <div id="welcomeMessage" style="font-weight: 600;"></div>
+        <button class="btn-logout" onclick="logout()">LOGOUT</button>
+    </div>
 
-    <div class="chart-container">
-        <div id="pieChart" class="pie-chart">
-            <div class="inner-circle">
-                <span>Total Units</span>
-                <strong id="centerTotal">0</strong>
+    <main>
+        <!-- KPI CARDS -->
+        <div class="grid-container" style="margin-bottom: 20px;">
+            <div class="kpi-card">
+                <div class="title">Tests Today</div>
+                <div class="value">14</div>
+            </div>
+            <div class="kpi-card">
+                <div class="title">Critical Alerts</div>
+                <div class="value critical">3</div>
+            </div>
+            <div class="kpi-card">
+                <div class="title">Device Success Rate</div>
+                <div class="value">99.4 <span class="unit">%</span></div>
             </div>
         </div>
-    </div>
 
-    <div class="legend">
-        <div class="legend-item"><div class="dot pass"></div> Passed</div>
-        <div class="legend-item"><div class="dot fail"></div> Failed</div>
-        <div class="legend-item"><div class="dot none"></div> Not Tested</div>
-    </div>
+        <div class="grid-container">
+            <!-- Daily Tests Overview -->
+            <div class="card" style="grid-column: span 2;">
+                <div class="card-title">Daily Tests Overview</div>
+                <div class="chart-placeholder">(Bar/Line Chart Placeholder)</div>
+            </div>
 
-    <button class="refresh-btn" onclick="loadStats()">↻ REFRESH DATA</button>
+            <!-- Result Distribution -->
+            <div class="card">
+                <div class="card-title">Result Distribution</div>
+                <div class="pie-chart-container">
+                    <div class="pie-chart"></div>
+                    <ul class="legend">
+                        <li><span class="dot" style="background:var(--success)"></span> Normal</li>
+                        <li><span class="dot" style="background:var(--warning)"></span> Abnormal</li>
+                        <li><span class="dot" style="background:var(--danger)"></span> Critical</li>
+                    </ul>
+                </div>
+            </div>
 
-    <div class="toolbar">
-        <div class="search-row">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="searchInput" placeholder="Search Terminal ID..." onkeyup="handleSearch(event)">
+            <!-- Device & Test Activity Feed -->
+            <div class="card">
+                <div class="card-title">Device & Test Activity</div>
+                <ul class="activity-feed">
+                    <li>QC Check <span class="highlight">Failed</span> on Hematology-1 <span class="time">Just now</span></li>
+                    <li>Reagent low alert for Cartridge #A789 <span class="time">1 hour ago</span></li>
+                    <li>Device #DX-4500 calibrated by "Dr. Lee" <span class="time">15 minutes ago</span></li>
+                    <li>New test completed: Glucose <span class="highlight">142 mg/dL</span> <span class="time">2 minutes ago</span></li>
+                </ul>
+            </div>
+
+            <!-- Most Performed Tests Table -->
+            <div class="card" style="grid-column: span 2;">
+                <div class="card-title">Most Performed Tests</div>
+                <table class="data-table">
+                    <thead><tr><th>Test Name</th><th>Volume</th><th>Positivity Rate</th><th>Status</th></tr></thead>
+                    <tbody>
+                        <tr><td>Hemoglobin A1c</td><td>88</td><td>4.5%</td><td><span class="status-dot" style="background:var(--success)"></span> In Stock</td></tr>
+                        <tr><td>Rapid Strep</td><td>32</td><td>12.5%</td><td><span class="status-dot" style="background:var(--success)"></span> In Stock</td></tr>
+                        <tr><td>Lipid Panel</td><td>22</td><td>8.1%</td><td><span class="status-dot" style="background:var(--warning)"></span> Low Reagent</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
-        
-        <div class="button-group">
-            <a href="/devices.html" class="action-btn btn-blue">Full Fleet Registry</a>
-            <a href="/devices.html?status=pass" class="action-btn btn-green">View Passed</a>
-            <a href="/devices.html?status=fail" class="action-btn btn-red">View Failed</a>
-            <a href="/devices.html?status=none" class="action-btn btn-amber">View Not Tested</a>
-        </div>
-    </div>
+    </main>
 </div>
 
 <script>
     // Ensure session exists
     const userStr = sessionStorage.getItem('user');
-    if (!userStr) window.location.href = '/login.html';
-    const user = JSON.parse(userStr);
-
-    if (user.role === 'admin') {
-        document.getElementById('adminLinks').innerHTML = `
-            <a href="/users.html" class="admin-link">⚙ USER MANAGEMENT</a>
-            <a href="/register.html" class="admin-link" style="color:var(--success);">+ REGISTER DEVICE</a>
-        `;
-    }
-
-    async function loadStats() {
-        try {
-            const res = await fetch(`/terminals/stats?api_key=supersecret123`);
-            const stats = await res.json();
-            document.getElementById('centerTotal').innerText = stats.total || 0;
-            updatePieChart(stats);
-        } catch (err) { console.error(err); }
-    }
-
-    function updatePieChart(s) {
-        const total = s.total || 1;
-        const pP = ((s.passed || 0) / total) * 360;
-        const pF = ((s.failed || 0) / total) * 360;
-        const pN = ((s.not_tested || 0) / total) * 360;
-        document.getElementById('pieChart').style.background = `conic-gradient(#28a745 0deg ${pP}deg, #dc3545 ${pP}deg ${pP + pF}deg, #f9a825 ${pP + pF}deg 360deg)`;
-    }
-
-    function handleSearch(e) {
-        if (e.key === 'Enter' && e.target.value.trim() !== "") {
-            window.location.href = `/devices.html?search=${encodeURIComponent(e.target.value.trim())}`;
+    if (!userStr) {
+        window.location.href = '/login.html';
+    } else {
+        const user = JSON.parse(userStr);
+        document.getElementById('welcomeMessage').innerText = `Welcome, ${user.username}`;
+        if (user.role !== 'admin') {
+            document.getElementById('adminUsersLink').style.display = 'none';
         }
     }
 
@@ -156,8 +164,6 @@
         sessionStorage.clear();
         window.location.href = '/login.html';
     }
-
-    loadStats();
 </script>
 
 </body>

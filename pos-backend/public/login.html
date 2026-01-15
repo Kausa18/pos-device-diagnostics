@@ -6,34 +6,91 @@
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f0f2f5; }
         .login-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 350px; text-align: center; }
-        h1 { color: #1e88e5; margin-bottom: 20px; }
+        h1 { color: #1e88e5; margin-bottom: 10px; }
+        .punchline { font-size: 16px; color: #555; height: 20px; margin-bottom: 20px; }
         input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #1e88e5; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 10px; }
-        button:hover { background: #1565c0; }
+        .password-container { position: relative; }
+        .forgot-password { position: absolute; top: -10px; right: 0; font-size: 12px; }
+        .forgot-password a { color: #1e88e5; text-decoration: none; }
         .error { color: #d32f2f; margin-top: 15px; font-size: 14px; display: none; }
         .footer { margin-top: 20px; font-size: 14px; }
         .footer a { color: #1e88e5; text-decoration: none; font-weight: bold; }
+        /* Slider */
+        .slide-to-verify { position: relative; width: 100%; background: #eee; border-radius: 6px; margin-top: 20px; padding: 5px; box-sizing: border-box; overflow: hidden; }
+        .slider-text { position: absolute; width: 100%; text-align: center; line-height: 40px; color: #aaa; font-weight: bold; user-select: none; }
+        .slider { position: relative; width: 50px; height: 40px; background: #1e88e5; color: white; border-radius: 6px; display: flex; justify-content: center; align-items: center; cursor: pointer; user-select: none; z-index: 2; }
     </style>
 </head>
 <body>
 
 <div class="login-card">
-    <h1>POS Diagnostics</h1>
-    <p>Sign in to your account</p>
+    <h1>Welcome Back!</h1>
+    <div class="punchline" id="punchline"></div>
     <input type="text" id="username" placeholder="Username">
-    <input type="password" id="password" placeholder="Password">
-    <button onclick="login()">Login</button>
+    <div class="password-container">
+        <div class="forgot-password"><a href="#">Forgot Password?</a></div>
+        <input type="password" id="password" placeholder="Password">
+    </div>
+    <div class="slide-to-verify" id="slider-container">
+        <div class="slider-text">Slide to Login</div>
+        <div class="slider" id="slider-handle">&gt;&gt;</div>
+    </div>
     <div id="error" class="error"></div>
     <div class="footer">
-        Don't have an account? <a href="/signup.html">Sign Up</a>
+        Don't have an account? <a href="signup.html">Sign Up</a>
     </div>
 </div>
 
 <script>
+    const punchlines = [
+        "Health Check for Your POS.",
+        "Diagnose. Resolve. Stay Open.",
+        "The POS Doctor Is In.",
+        "See Everything. Fix Anything.",
+        "Smarter POS Support."
+    ];
+    let punchlineIndex = 0;
+    const punchlineEl = document.getElementById('punchline');
+
+    function showNextPunchline() {
+        punchlineEl.innerText = punchlines[punchlineIndex];
+        punchlineIndex = (punchlineIndex + 1) % punchlines.length;
+    }
+    setInterval(showNextPunchline, 3000);
+    showNextPunchline(); // Initial call
+
+    const slider = document.getElementById('slider-handle');
+    const container = document.getElementById('slider-container');
+    const sliderText = container.querySelector('.slider-text');
+    let isDragging = false;
+
+    slider.addEventListener('mousedown', () => { isDragging = true; });
+    document.addEventListener('mouseup', (e) => {
+        if (isDragging) {
+            const maxPos = container.offsetWidth - slider.offsetWidth;
+            if (slider.offsetLeft >= maxPos - 5) {
+                slider.style.left = maxPos + 'px';
+                login();
+            } else {
+                slider.style.left = '0px';
+            }
+        }
+        isDragging = false;
+    });
+    document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const containerRect = container.getBoundingClientRect();
+        let newX = e.clientX - containerRect.left - (slider.offsetWidth / 2);
+        newX = Math.max(0, newX);
+        newX = Math.min(newX, container.offsetWidth - slider.offsetWidth);
+        slider.style.left = newX + 'px';
+    });
+
     async function login() {
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
         const errorDiv = document.getElementById('error');
+        errorDiv.style.display = 'none';
 
         try {
             const res = await fetch('/auth/login', {
@@ -44,15 +101,33 @@
             const data = await res.json();
 
             if (res.ok) {
-                sessionStorage.setItem('user', JSON.stringify(data.user));
-                window.location.href = '/dashboard.html';
+                sliderText.innerText = "Success";
+                container.style.background = "#28a745"; // Green
+                setTimeout(() => {
+                    sessionStorage.setItem('user', JSON.stringify(data.user));
+                    window.location.href = '/dashboard.html';
+                }, 500);
             } else {
+                sliderText.innerText = "Fail";
+                container.style.background = "#cc0000"; // Red
                 errorDiv.innerText = data.error;
                 errorDiv.style.display = 'block';
+                setTimeout(() => {
+                    slider.style.left = '0px';
+                    sliderText.innerText = "Slide to Login";
+                    container.style.background = "#eee";
+                }, 1500);
             }
         } catch (e) {
+            sliderText.innerText = "Fail";
+            container.style.background = "#cc0000"; // Red
             errorDiv.innerText = "Server error. Try again later.";
             errorDiv.style.display = 'block';
+            setTimeout(() => {
+                slider.style.left = '0px';
+                sliderText.innerText = "Slide to Login";
+                container.style.background = "#eee";
+            }, 1500);
         }
     }
 </script>

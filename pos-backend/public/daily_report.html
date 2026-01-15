@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Daily Test Report</title>
+    <style>
+        :root {
+            --primary: #1e88e5; --success: #28a745; --danger: #dc3545; --warning: #f9a825;
+            --bg: #f0f2f5; --card-bg: #ffffff; --text: #2c3e50; --text-muted: #7f8c8d;
+        }
+        body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; margin: 0; background: var(--bg); }
+        .header { background: var(--card-bg); padding: 12px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e0e0e0; }
+        .header a { color: var(--primary); text-decoration: none; font-weight: 700; }
+        .container { max-width: 1200px; margin: 20px auto; padding: 20px; background: var(--card-bg); border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h1 { color: var(--text); }
+
+        .main-table { width: 100%; border-collapse: collapse; }
+        .main-table th, .main-table td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
+        .main-table th { background: #f8f9fa; color: #666; font-size: 13px; text-transform: uppercase; }
+        .main-table .summary-row { cursor: pointer; transition: background-color 0.2s; }
+        .main-table .summary-row:hover { background-color: #f8f9fa; }
+        
+        .details-row { display: none; }
+        .details-row td { padding: 0; background-color: #fdfdfd; }
+        .details-table { width: 100%; border-collapse: collapse; }
+        .details-table th, .details-table td { padding: 12px 20px; border-bottom: 1px solid #f0f0f0; }
+        .details-table th { background: #f1f3f5; }
+        .details-table tr:last-child td { border: none; }
+
+        .status-badge { font-weight: 700; padding: 4px 8px; border-radius: 6px; color: white; }
+        .status-badge.pass { background: var(--success); }
+        .status-badge.fail { background: var(--danger); }
+        .status-badge.skipped { background: var(--warning); color: #333;}
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Daily Report</h1>
+    <a href="dashboard.html">&larr; Back to Dashboard</a>
+</div>
+
+<div class="container" id="report-container">
+    <h1 id="report-title">Loading report...</h1>
+    <table class="main-table">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Terminal ID</th>
+                <th>Manufacturer</th>
+                <th>Model</th>
+                <th>Overall Status</th>
+            </tr>
+        </thead>
+        <tbody id="report-body"></tbody>
+    </table>
+</div>
+
+<script>
+    const API_KEY = "supersecret123";
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const date = urlParams.get('date');
+        if (date) {
+            const displayDate = new Date(date.replace(/-/g, '/'));
+            document.getElementById('report-title').innerText = `Test Report for ${displayDate.toLocaleDateString()}`;
+            loadReportData(date);
+        }
+    });
+
+    async function loadReportData(date) {
+        try {
+            const [diagsRes, terminalsRes] = await Promise.all([
+                fetch(`/diagnostics?api_key=${API_KEY}`),
+                fetch(`/terminals?api_key=${API_KEY}`)
+            ]);
+
+            if (!diagsRes.ok || !terminalsRes.ok) throw new Error('Failed to fetch all required data.');
+
+            const diagnostics = await diagsRes.json();
+            const terminals = await terminalsRes.json();
+            
+            const terminalMeta = terminals.reduce((acc, t) => { acc[t.terminal_id] = t; return acc; }, {});
+
+            const targetDate = new Date(date.replace(/-/g, '/'));
+            const filteredDiags = diagnostics.filter(diag => {
+                const diagDate = new Date(diag.receivedAt);
+                return diagDate.getFullYear() === targetDate.getFullYear() &&
+                       diagDate.getMonth() === targetDate.getMonth() &&
+                       diagDate.getDate() === targetDate.getDate();
+            });
+
+            renderReport(filteredDiags, terminalMeta);
+        } catch (error) {
+            console.error("Error loading report data:", error);
+            document.getElementById('report-body').innerHTML = '<tr><td colspan="5">Error loading report.</td></tr>';
+        }
+    }
+
+    function calculateOverallStatus(diag) {
+        if (!diag.payload || !diag.payload.results || diag.payload.results.length === 0) {
+            return { status: diag.summaryStatus, className: diag.summaryStatus };
+        }
+        const counts = { PASS: 0, FAIL: 0, SKIPPED: 0 };
+        diag.payload.results.forEach(test => { counts[test.status]++; });
+        const maxCount = Math.max(counts.PASS, counts.FAIL, counts.SKIPPED);
+        if (counts.FAIL === maxCount) return { status: 'FAIL', className: 'fail' };
+        if (counts.SKIPPED === maxCount) return { status: 'SKIPPED', className: 'skipped' };
+        return { status: 'PASS', className: 'pass' };
+    }
+
+    function renderReport(diagnostics, terminalMeta) {
+        const tbody = document.getElementById('report-body');
+        tbody.innerHTML = '';
+
+        if (diagnostics.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5">No tests were performed on this day.</td></tr>';
+            return;
+        }
+
+        diagnostics.sort((a,b) => new Date(b.receivedAt) - new Date(a.receivedAt));
+
+        diagnostics.forEach((diag) => {
+            const terminalId = diag.payload.terminal_id || 'Unknown';
+            const meta = terminalMeta[terminalId];
+            const overall = calculateOverallStatus(diag);
+
+            const summaryRow = document.createElement('tr');
+            summaryRow.className = 'summary-row';
+            summaryRow.innerHTML = `
+                <td>${new Date(diag.receivedAt).toLocaleTimeString()}</td>
+                <td><strong>${terminalId}</strong></td>
+                <td>${meta ? meta.manufacturer : '-'}</td>
+                <td>${meta ? meta.model : '-'}</td>
+                <td><span class="status-badge ${overall.className}">${overall.status}</span></td>
+            `;
+
+            const detailsRow = document.createElement('tr');
+            detailsRow.className = 'details-row';
+            let detailsHtml = '<td colspan="5"><table class="details-table"><thead><tr><th>Test Name</th><th>Status</th><th>Result/Details</th></tr></thead><tbody>';
+
+            if (diag.payload.results && diag.payload.results.length > 0) {
+                diag.payload.results.forEach(test => {
+                    const statusClass = test.status === 'PASS' ? 'pass' : (test.status === 'FAIL' ? 'fail' : 'skipped');
+                    // *** FIX: Use test.result for the details column ***
+                    detailsHtml += `<tr>
+                        <td>${test.name}</td>
+                        <td><span class="status-badge ${statusClass}">${test.status}</span></td>
+                        <td>${test.result || 'N/A'}</td>
+                    </tr>`;
+                });
+            } else {
+                detailsHtml += '<tr><td colspan="3">No individual test results available for this entry.</td></tr>';
+            }
+            detailsHtml += '</tbody></table></td>';
+            detailsRow.innerHTML = detailsHtml;
+
+            summaryRow.onclick = () => {
+                const isVisible = detailsRow.style.display === 'table-row';
+                detailsRow.style.display = isVisible ? 'none' : 'table-row';
+            };
+
+            tbody.appendChild(summaryRow);
+            tbody.appendChild(detailsRow);
+        });
+    }
+</script>
+
+</body>
+</html>
