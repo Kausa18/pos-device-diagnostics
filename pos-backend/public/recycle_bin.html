@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Recycle Bin - User Management</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <style>
+        :root {
+            --primary: #1e88e5; --success: #28a745; --danger: #dc3545; --warning: #f9a825;
+            --bg: #f0f2f5; --card-bg: #ffffff; --text: #2c3e50; --text-muted: #7f8c8d;
+            --sidebar-bg: #1a2a3a; --sidebar-text: #bdc3c7; --sidebar-active: #ffffff;
+        }
+        body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; margin: 0; background: var(--bg); display: flex; }
+        
+        /* Sidebar */
+        .sidebar { 
+            width: 260px; 
+            background: var(--sidebar-bg); 
+            color: var(--sidebar-text); 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; 
+            position: fixed; 
+            transition: width 0.3s ease;
+            z-index: 200;
+        }
+        .sidebar-brand { padding: 20px; font-size: 20px; font-weight: 900; color: var(--sidebar-active); text-align: center; border-bottom: 1px solid #2c3e50; white-space: nowrap; overflow: hidden; }
+        .sidebar-nav { flex-grow: 1; }
+        .sidebar-nav-section { font-size: 12px; text-transform: uppercase; padding: 20px 20px 10px; font-weight: 700; color: #7f8c8d; overflow: hidden; white-space: nowrap; }
+        .sidebar-nav a { display: flex; align-items: center; gap: 15px; color: var(--sidebar-text); text-decoration: none; padding: 12px 20px; font-weight: 600; transition: 0.2s; border-left: 3px solid transparent; white-space: nowrap; }
+        .sidebar-nav a i { font-size: 22px; min-width: 22px; text-align: center; }
+        .sidebar-nav a:hover { background: #2c3e50; color: var(--sidebar-active); }
+        .sidebar-nav a.active { background: #2c3e50; color: var(--sidebar-active); border-left-color: var(--primary); }
+
+        .sidebar-toggle {
+            border-top: 1px solid #2c3e50;
+            padding: 15px 0;
+            text-align: center;
+            cursor: pointer;
+            color: var(--sidebar-text);
+        }
+        .sidebar-toggle i { font-size: 24px; transition: transform 0.3s ease; }
+
+        /* Collapsed Sidebar */
+        .sidebar.collapsed { width: 80px; }
+        .sidebar.collapsed .sidebar-brand .link-text, .sidebar.collapsed .sidebar-nav-section, .sidebar.collapsed .link-text { display: none; }
+        .sidebar.collapsed .sidebar-brand { font-size: 14px; }
+        .sidebar.collapsed .sidebar-nav a { justify-content: center; padding: 12px 10px; }
+        .sidebar.collapsed .sidebar-toggle i { transform: rotate(180deg); }
+        
+        /* Main Content */
+        .main-content { 
+            flex-grow: 1; 
+            margin-left: 260px; 
+            display: flex; 
+            flex-direction: column; 
+            transition: margin-left 0.3s ease;
+        }
+        .main-content.collapsed { margin-left: 80px; }
+        .header { background: var(--card-bg); padding: 12px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e0e0e0; position: sticky; top: 0; z-index: 100; }
+        .header-left { flex-grow: 1; }
+        .header-right { display: flex; align-items: center; gap: 20px; }
+
+        .user-profile { position: relative; }
+        .user-profile i { font-size: 28px; cursor: pointer; color: #555; }
+        .profile-dropdown { display: none; position: absolute; top: 140%; right: 0; background: var(--card-bg); border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); min-width: 220px; z-index: 101; padding: 10px; }
+        .user-profile:hover .profile-dropdown { display: block; }
+        .profile-dropdown-header { display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 10px; }
+        .profile-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        .profile-dropdown-header div { font-weight: 600; }
+        .profile-dropdown-links a, .profile-dropdown-links button { display: block; background: none; border: none; text-align: left; width: 100%; padding: 10px; border-radius: 6px; font-size: 14px; color: var(--text); text-decoration: none; cursor: pointer; }
+        .profile-dropdown-links a:hover, .profile-dropdown-links button:hover { background: #f0f2f5; }
+
+        main { padding: 20px; }
+        .card { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .card-title-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .card-title { font-size: 18px; font-weight: 700; margin: 0; }
+        .btn-back { font-size: 14px; font-weight: 600; color: var(--primary); text-decoration: none; }
+
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f8f9fa; color: #666; font-size: 13px; text-transform: uppercase; }
+        .action-cell { display: flex; gap: 8px; }
+        .btn-restore { background: var(--success); color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; transition: background-color 0.2s; }
+        .btn-delete { background: var(--danger); color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; transition: background-color 0.2s; }
+        .btn-restore:hover { background-color: #218838; }
+        .btn-delete:hover { background-color: #b71c1c; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-brand"><span class="link-text">IZYANE DIAGNOSTICS</span></div>
+    <div class="sidebar-nav">
+        <div class="sidebar-nav-section">Overall Dashboard</div>
+        <a href="dashboard.html"><i class='bx bxs-dashboard'></i><span class="link-text">Dashboard</span></a>
+
+        <div class="sidebar-nav-section">Device Management</div>
+        <a href="devices.html"><i class='bx bx-desktop'></i><span class="link-text">Devices</span></a>
+        <a href="daily_report.html"><i class='bx bxs-report'></i><span class="link-text">Reports</span></a>
+        <a href="test_logs.html"><i class='bx bx-history'></i><span class="link-text">Test Report Logs</span></a>
+
+        <div class="sidebar-nav-section" id="admin-section">Admin</div>
+        <a href="users.html" id="adminUsersLink" class="active"><i class='bx bxs-user-account'></i><span class="link-text">User Management</span></a>
+        <a href="settings.html" id="adminSettingsLink"><i class='bx bxs-cog'></i><span class="link-text">Settings</span></a>
+
+        <div class="sidebar-nav-section">Account</div>
+        <a href="profile.html"><i class='bx bxs-user-circle'></i><span class="link-text">Profile</span></a>
+    </div>
+    <div class="sidebar-toggle" onclick="toggleSidebar()">
+        <i class='bx bx-chevron-left'></i>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="header">
+        <div id="welcomeMessage" style="font-weight: 600; flex-grow: 1;"></div>
+        <div class="header-right">
+             <div class="user-profile">
+                <i class='bx bxs-user-circle'></i>
+                <div class="profile-dropdown">
+                    <div class="profile-dropdown-header">
+                        <img id="profile-avatar-img" src="https://i.pravatar.cc/40" alt="Avatar" class="profile-avatar">
+                        <div>
+                            <span id="profile-username-display" style="font-weight: bold;">User</span>
+                        </div>
+                    </div>
+                    <div class="profile-dropdown-links">
+                        <a href="profile.html">Edit Profile</a>
+                        <button onclick="logout()">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main>
+        <div class="card">
+            <div class="card-title-container">
+                <div class="card-title">Recycle Bin</div>
+                <a href="users.html" class="btn-back">Back to User Management</a>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Date Deleted</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="userTable"></tbody>
+            </table>
+        </div>
+    </main>
+</div>
+
+<script>
+    const userStr = sessionStorage.getItem('user');
+    let user;
+    let allUsers = [];
+    if (!userStr) {
+        window.location.href = '/login.html';
+    } else {
+        user = JSON.parse(userStr);
+        document.getElementById('welcomeMessage').innerText = `Welcome, ${user.username}`;
+        document.getElementById('profile-username-display').innerText = user.username;
+        const savedAvatar = localStorage.getItem(`avatar_${user.username}`);
+        if(savedAvatar) {
+            document.getElementById('profile-avatar-img').src = savedAvatar;
+        }
+
+        if (user.role !== 'admin') {
+            const adminElements = document.querySelectorAll('#admin-section, #adminUsersLink, #adminSettingsLink');
+            adminElements.forEach(el => el.style.display = 'none');
+            window.location.href = '/dashboard.html';
+        }
+    }
+
+    function toggleSidebar() {
+        const sidebar = document.querySelector(".sidebar");
+        const mainContent = document.querySelector(".main-content");
+        sidebar.classList.toggle("collapsed");
+        mainContent.classList.toggle("collapsed");
+        localStorage.setItem('sidebar-collapsed', sidebar.classList.contains('collapsed'));
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        if (localStorage.getItem('sidebar-collapsed') === 'true') {
+            document.querySelector('.sidebar').classList.add('collapsed');
+            document.querySelector('.main-content').classList.add('collapsed');
+        }
+        loadUsers();
+    });
+
+    async function loadUsers() {
+        const res = await fetch('/auth/users');
+        allUsers = await res.json();
+        const tbody = document.getElementById('userTable');
+        tbody.innerHTML = '';
+
+        const deletedUsers = allUsers.filter(u => u.status === 'deleted');
+
+        if(deletedUsers.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="3">The recycle bin is empty.</td></tr>`;
+            return;
+        }
+
+        deletedUsers.forEach(u => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${u.username}</td>
+                <td>${new Date(u.updated_at).toLocaleDateString()}</td>
+                <td class="action-cell">
+                    <button class="btn-restore" onclick="restoreUser(${u.id})">Restore</button>
+                    <button class="btn-delete" onclick="deleteUserPermanently(${u.id})">Delete Permanently</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    async function restoreUser(id) {
+        if(confirm("Are you sure you want to restore this user?")) {
+            await fetch(`/auth/users/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 'pending' })
+            });
+            loadUsers();
+        }
+    }
+
+    async function deleteUserPermanently(id) {
+        const userToDelete = allUsers.find(u => u.id === id);
+        if (confirm("Are you sure you want to permanently delete this user? This action cannot be undone.")) {
+            await fetch(`/auth/users/${id}`, { method: 'DELETE' });
+            // Remove user's avatar from local storage
+            if(userToDelete) {
+                localStorage.removeItem(`avatar_${userToDelete.username}`);
+            }
+            loadUsers();
+        }
+    }
+
+    function logout() {
+        sessionStorage.clear();
+        window.location.href = '/login.html';
+    }
+
+    loadUsers();
+</script>
+
+</body>
+</html>

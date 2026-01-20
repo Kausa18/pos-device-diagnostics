@@ -2,168 +2,397 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Daily Test Report</title>
+    <title>Diagnostic Report - POS Diagnostics</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <style>
         :root {
             --primary: #1e88e5; --success: #28a745; --danger: #dc3545; --warning: #f9a825;
             --bg: #f0f2f5; --card-bg: #ffffff; --text: #2c3e50; --text-muted: #7f8c8d;
+            --sidebar-bg: #1a2a3a; --sidebar-text: #bdc3c7; --sidebar-active: #ffffff;
         }
-        body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; margin: 0; background: var(--bg); }
-        .header { background: var(--card-bg); padding: 12px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e0e0e0; }
-        .header a { color: var(--primary); text-decoration: none; font-weight: 700; }
-        .container { max-width: 1200px; margin: 20px auto; padding: 20px; background: var(--card-bg); border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        h1 { color: var(--text); }
+        body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; margin: 0; background: var(--bg); display: flex; }
+        
+        /* Sidebar */
+        .sidebar { 
+            width: 260px; 
+            background: var(--sidebar-bg); 
+            color: var(--sidebar-text); 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; 
+            position: fixed; 
+            transition: width 0.3s ease;
+            z-index: 200;
+        }
+        .sidebar-brand { padding: 20px; font-size: 20px; font-weight: 900; color: var(--sidebar-active); text-align: center; border-bottom: 1px solid #2c3e50; white-space: nowrap; overflow: hidden; }
+        .sidebar-nav { flex-grow: 1; }
+        .sidebar-nav-section { font-size: 12px; text-transform: uppercase; padding: 20px 20px 10px; font-weight: 700; color: #7f8c8d; overflow: hidden; white-space: nowrap; }
+        .sidebar-nav a { display: flex; align-items: center; gap: 15px; color: var(--sidebar-text); text-decoration: none; padding: 12px 20px; font-weight: 600; transition: 0.2s; border-left: 3px solid transparent; white-space: nowrap; }
+        .sidebar-nav a i { font-size: 22px; min-width: 22px; text-align: center; }
+        .sidebar-nav a:hover { background: #2c3e50; color: var(--sidebar-active); }
+        .sidebar-nav a.active { background: #2c3e50; color: var(--sidebar-active); border-left-color: var(--primary); }
+
+        .sidebar-toggle {
+            border-top: 1px solid #2c3e50;
+            padding: 15px 0;
+            text-align: center;
+            cursor: pointer;
+            color: var(--sidebar-text);
+        }
+        .sidebar-toggle i { font-size: 24px; transition: transform 0.3s ease; }
+
+        /* Collapsed Sidebar */
+        .sidebar.collapsed { width: 80px; }
+        .sidebar.collapsed .sidebar-brand .link-text, .sidebar.collapsed .sidebar-nav-section, .sidebar.collapsed .link-text { display: none; }
+        .sidebar.collapsed .sidebar-brand { font-size: 14px; }
+        .sidebar.collapsed .sidebar-nav a { justify-content: center; padding: 12px 10px; }
+        .sidebar.collapsed .sidebar-toggle i { transform: rotate(180deg); }
+        
+        /* Main Content */
+        .main-content { 
+            flex-grow: 1; 
+            margin-left: 260px; 
+            display: flex; 
+            flex-direction: column; 
+            transition: margin-left 0.3s ease;
+        }
+        .main-content.collapsed { margin-left: 80px; }
+        .header { background: var(--card-bg); padding: 12px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e0e0e0; position: sticky; top: 0; z-index: 100; }
+        .header-left { flex-grow: 1; }
+        .header-right { display: flex; align-items: center; gap: 25px; }
+
+        .user-profile, .notification-container { position: relative; }
+        .user-profile > i, .notification-container > i { font-size: 28px; cursor: pointer; color: #555; }
+        
+        .profile-dropdown, .notification-dropdown { display: none; position: absolute; top: 140%; right: 0; background: var(--card-bg); border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); min-width: 220px; z-index: 101; padding: 10px; }
+        .profile-dropdown.show, .notification-dropdown.show { display: block; }
+        
+        .profile-dropdown-header { display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 10px; }
+        .profile-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        .profile-dropdown-header div { font-weight: 600; }
+        .profile-dropdown-links a, .profile-dropdown-links button { display: block; background: none; border: none; text-align: left; width: 100%; padding: 10px; border-radius: 6px; font-size: 14px; color: var(--text); text-decoration: none; cursor: pointer; }
+        .profile-dropdown-links a:hover, .profile-dropdown-links button:hover { background: #f0f2f5; }
+
+        .notification-count { display: none; position: absolute; top: -5px; right: -8px; background: var(--danger); color: white; border-radius: 50%; padding: 2px 6px; font-size: 11px; font-weight: bold; }
+        .notification-dropdown a { display: block; padding: 10px 15px; font-size: 14px; color: var(--text); text-decoration: none; border-bottom: 1px solid #f0f0f0; }
+        .notification-dropdown a:last-child { border-bottom: none; }
+        .notification-dropdown a:hover { background: #f8f9fa; }
+        .no-notifications { padding: 15px; color: var(--text-muted); font-style: italic; }
+
+        main { padding: 20px; }
+        .card { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .card-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+        .filter-container { display: flex; gap: 15px; margin-bottom: 20px; }
+        .filter-container select { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
 
         .main-table { width: 100%; border-collapse: collapse; }
         .main-table th, .main-table td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
         .main-table th { background: #f8f9fa; color: #666; font-size: 13px; text-transform: uppercase; }
-        .main-table .summary-row { cursor: pointer; transition: background-color 0.2s; }
-        .main-table .summary-row:hover { background-color: #f8f9fa; }
+        .summary-row { cursor: pointer; transition: background-color 0.2s; }
+        .summary-row:hover { background-color: #f8f9fa; }
         
         .details-row { display: none; }
-        .details-row td { padding: 0; background-color: #fdfdfd; }
+        .details-row.show { display: table-row; }
+        .details-row td { padding: 0; background-color: #fdfdfd; border-top: 2px solid var(--primary); }
         .details-table { width: 100%; border-collapse: collapse; }
         .details-table th, .details-table td { padding: 12px 20px; border-bottom: 1px solid #f0f0f0; }
         .details-table th { background: #f1f3f5; }
         .details-table tr:last-child td { border: none; }
 
-        .status-badge { font-weight: 700; padding: 4px 8px; border-radius: 6px; color: white; }
+        .status-badge { font-weight: 700; padding: 4px 8px; border-radius: 6px; color: white; display: inline-block; }
         .status-badge.pass { background: var(--success); }
         .status-badge.fail { background: var(--danger); }
         .status-badge.skipped { background: var(--warning); color: #333;}
+        .pagination { margin-top: 20px; text-align: center; }
+        .pagination button { background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin: 0 5px; }
+        .pagination button:disabled { background: #ccc; cursor: not-allowed; }
+
     </style>
 </head>
 <body>
 
-<div class="header">
-    <h1>Daily Report</h1>
-    <a href="dashboard.html">&larr; Back to Dashboard</a>
+<div class="sidebar">
+    <div class="sidebar-brand"><span class="link-text">IZYANE DIAGNOSTICS</span></div>
+    <div class="sidebar-nav">
+        <div class="sidebar-nav-section">Overall Dashboard</div>
+        <a href="dashboard.html"><i class='bx bxs-dashboard'></i><span class="link-text">Dashboard</span></a>
+
+        <div class="sidebar-nav-section">Device Management</div>
+        <a href="devices.html"><i class='bx bx-desktop'></i><span class="link-text">Devices</span></a>
+        <a href="daily_report.html" class="active"><i class='bx bxs-report'></i><span class="link-text">Reports</span></a>
+        <a href="test_logs.html"><i class='bx bx-history'></i><span class="link-text">Test Report Logs</span></a>
+        
+        <div class="sidebar-nav-section" id="admin-section">Admin</div>
+        <a href="users.html" id="adminUsersLink"><i class='bx bxs-user-account'></i><span class="link-text">User Management</span></a>
+        <a href="settings.html" id="adminSettingsLink"><i class='bx bxs-cog'></i><span class="link-text">Settings</span></a>
+
+        <div class="sidebar-nav-section">Account</div>
+        <a href="profile.html"><i class='bx bxs-user-circle'></i><span class="link-text">Profile</span></a>
+    </div>
+    <div class="sidebar-toggle" onclick="toggleSidebar()">
+        <i class='bx bx-chevron-left'></i>
+    </div>
 </div>
 
-<div class="container" id="report-container">
-    <h1 id="report-title">Loading report...</h1>
-    <table class="main-table">
-        <thead>
-            <tr>
-                <th>Time</th>
-                <th>Terminal ID</th>
-                <th>Manufacturer</th>
-                <th>Model</th>
-                <th>Overall Status</th>
-            </tr>
-        </thead>
-        <tbody id="report-body"></tbody>
-    </table>
+<div class="main-content">
+    <div class="header">
+        <div id="welcomeMessage" style="font-weight: 600; flex-grow: 1;"></div>
+        <div class="header-right">
+            <div class="notification-container" id="notification-bell" style="display: none;">
+                <i class='bx bxs-bell'></i>
+                <span class="notification-count">0</span>
+                <div class="notification-dropdown">
+                    <!-- Pending users populated by JS -->
+                </div>
+            </div>
+            <div class="user-profile">
+                <i class='bx bxs-user-circle'></i>
+                <div class="profile-dropdown">
+                    <div class="profile-dropdown-header">
+                        <img id="profile-avatar-img" src="https://i.pravatar.cc/40" alt="Avatar" class="profile-avatar">
+                        <div>
+                            <span id="profile-username-display" style="font-weight: bold;">User</span>
+                        </div>
+                    </div>
+                    <div class="profile-dropdown-links">
+                        <a href="profile.html">Edit Profile</a>
+                        <button onclick="logout()">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main>
+        <div class="card">
+            <div class="card-title" id="report-title">Diagnostic Report</div>
+            <div class="filter-container">
+                <select id="year-filter"></select>
+                <select id="month-filter"></select>
+                <select id="status-filter">
+                    <option value="">All Statuses</option>
+                    <option value="pass">Pass</option>
+                    <option value="fail">Fail</option>
+                </select>
+            </div>
+            <table class="main-table">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Terminal ID</th>
+                        <th>Overall Status</th>
+                    </tr>
+                </thead>
+                <tbody id="report-body"></tbody>
+            </table>
+            <div class="pagination" id="pagination-controls"></div>
+        </div>
+    </main>
 </div>
 
+<script src="/js/data_fetcher.js"></script>
 <script>
-    const API_KEY = "supersecret123";
+    const userStr = sessionStorage.getItem('user');
+    let user;
+    let allDiagnostics = [];
+    let currentPage = 1;
+    const rowsPerPage = 10;
 
-    document.addEventListener('DOMContentLoaded', () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const date = urlParams.get('date');
-        if (date) {
-            const displayDate = new Date(date.replace(/-/g, '/'));
-            document.getElementById('report-title').innerText = `Test Report for ${displayDate.toLocaleDateString()}`;
-            loadReportData(date);
+    if (!userStr) {
+        window.location.href = '/login.html';
+    } else {
+        user = JSON.parse(userStr);
+        document.getElementById('welcomeMessage').innerText = `Welcome, ${user.username}`;
+        document.getElementById('profile-username-display').innerText = user.username;
+        const savedAvatar = localStorage.getItem(`avatar_${user.username}`);
+        if(savedAvatar) {
+            document.getElementById('profile-avatar-img').src = savedAvatar;
         }
+
+        if (user.role !== 'admin') {
+            const adminElements = document.querySelectorAll('#admin-section, #adminUsersLink, #adminSettingsLink');
+            adminElements.forEach(el => el.style.display = 'none');
+        }
+    }
+
+    function logout() {
+        sessionStorage.clear();
+        window.location.href = '/login.html';
+    }
+
+    function toggleSidebar() {
+        const sidebar = document.querySelector(".sidebar");
+        const mainContent = document.querySelector(".main-content");
+        sidebar.classList.toggle("collapsed");
+        mainContent.classList.toggle("collapsed");
+        localStorage.setItem('sidebar-collapsed', sidebar.classList.contains('collapsed'));
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        if (localStorage.getItem('sidebar-collapsed') === 'true') {
+            document.querySelector('.sidebar').classList.add('collapsed');
+            document.querySelector('.main-content').classList.add('collapsed');
+        }
+
+        await loadAndProcessData();
+
+        document.getElementById('year-filter').addEventListener('change', () => { currentPage = 1; renderReport(); });
+        document.getElementById('month-filter').addEventListener('change', () => { currentPage = 1; renderReport(); });
+        document.getElementById('status-filter').addEventListener('change', () => { currentPage = 1; renderReport(); });
+
+        // Dropdown Toggle Logic
+        document.querySelectorAll('.user-profile, .notification-container').forEach(container => {
+            const i = container.querySelector('i');
+            const dropdown = container.querySelector('.profile-dropdown, .notification-dropdown');
+            i.addEventListener('click', (event) => {
+                if(dropdown) dropdown.classList.toggle('show');
+                event.stopPropagation();
+            });
+        });
+
+        window.addEventListener('click', () => {
+            document.querySelectorAll('.profile-dropdown, .notification-dropdown').forEach(dropdown => {
+                if (dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                }
+            });
+        });
     });
 
-    async function loadReportData(date) {
+    async function loadAndProcessData() {
         try {
-            const [diagsRes, terminalsRes] = await Promise.all([
-                fetch(`/diagnostics?api_key=${API_KEY}`),
-                fetch(`/terminals?api_key=${API_KEY}`)
-            ]);
-
-            if (!diagsRes.ok || !terminalsRes.ok) throw new Error('Failed to fetch all required data.');
-
-            const diagnostics = await diagsRes.json();
-            const terminals = await terminalsRes.json();
+            allDiagnostics = await fetchDiagnostics();
+            allDiagnostics.sort((a,b) => new Date(b.receivedAt) - new Date(a.receivedAt));
             
-            const terminalMeta = terminals.reduce((acc, t) => { acc[t.terminal_id] = t; return acc; }, {});
+            populateFilters();
+            renderReport();
 
-            const targetDate = new Date(date.replace(/-/g, '/'));
-            const filteredDiags = diagnostics.filter(diag => {
-                const diagDate = new Date(diag.receivedAt);
-                return diagDate.getFullYear() === targetDate.getFullYear() &&
-                       diagDate.getMonth() === targetDate.getMonth() &&
-                       diagDate.getDate() === targetDate.getDate();
-            });
-
-            renderReport(filteredDiags, terminalMeta);
-        } catch (error) {
-            console.error("Error loading report data:", error);
-            document.getElementById('report-body').innerHTML = '<tr><td colspan="5">Error loading report.</td></tr>';
+            if(user.role === 'admin') {
+                const users = await fetchUsers();
+                updateNotifications(users);
+            }
+        } catch(e) {
+            console.error("Error loading report data:", e);
         }
     }
 
-    function calculateOverallStatus(diag) {
-        if (!diag.payload || !diag.payload.results || diag.payload.results.length === 0) {
-            return { status: diag.summaryStatus, className: diag.summaryStatus };
-        }
-        const counts = { PASS: 0, FAIL: 0, SKIPPED: 0 };
-        diag.payload.results.forEach(test => { counts[test.status]++; });
-        const maxCount = Math.max(counts.PASS, counts.FAIL, counts.SKIPPED);
-        if (counts.FAIL === maxCount) return { status: 'FAIL', className: 'fail' };
-        if (counts.SKIPPED === maxCount) return { status: 'SKIPPED', className: 'skipped' };
-        return { status: 'PASS', className: 'pass' };
+    function populateFilters() {
+        const yearFilter = document.getElementById('year-filter');
+        const monthFilter = document.getElementById('month-filter');
+        const urlParams = new URLSearchParams(window.location.search);
+
+        const years = [...new Set(allDiagnostics.map(d => new Date(d.receivedAt).getFullYear()))];
+        years.forEach(y => yearFilter.add(new Option(y, y)));
+        
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        monthNames.forEach((m, i) => monthFilter.add(new Option(m, i)));
+
+        // Set initial filter values
+        const targetYear = urlParams.get('year') || new Date().getFullYear();
+        const targetMonth = urlParams.get('month') ? urlParams.get('month') - 1 : new Date().getMonth();
+
+        yearFilter.value = targetYear;
+        monthFilter.value = targetMonth;
     }
 
-    function renderReport(diagnostics, terminalMeta) {
+    function renderReport() {
+        const year = document.getElementById('year-filter').value;
+        const month = document.getElementById('month-filter').value;
+        const status = document.getElementById('status-filter').value;
+
+        const filtered = allDiagnostics.filter(d => {
+            const date = new Date(d.receivedAt);
+            return date.getFullYear() == year && date.getMonth() == month && (!status || d.summaryStatus === status);
+        });
+
         const tbody = document.getElementById('report-body');
         tbody.innerHTML = '';
 
-        if (diagnostics.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5">No tests were performed on this day.</td></tr>';
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3">No records found for the selected criteria.</td></tr>';
+            setupPagination(0);
             return;
         }
 
-        diagnostics.sort((a,b) => new Date(b.receivedAt) - new Date(a.receivedAt));
+        const paginated = filtered.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
-        diagnostics.forEach((diag) => {
-            const terminalId = diag.payload.terminal_id || 'Unknown';
-            const meta = terminalMeta[terminalId];
-            const overall = calculateOverallStatus(diag);
-
+        paginated.forEach(diag => {
             const summaryRow = document.createElement('tr');
             summaryRow.className = 'summary-row';
             summaryRow.innerHTML = `
-                <td>${new Date(diag.receivedAt).toLocaleTimeString()}</td>
-                <td><strong>${terminalId}</strong></td>
-                <td>${meta ? meta.manufacturer : '-'}</td>
-                <td>${meta ? meta.model : '-'}</td>
-                <td><span class="status-badge ${overall.className}">${overall.status}</span></td>
+                <td>${new Date(diag.receivedAt).toLocaleString()}</td>
+                <td><strong>${diag.payload.terminal_id}</strong></td>
+                <td><span class="status-badge ${diag.summaryStatus}">${diag.summaryStatus}</span></td>
             `;
 
             const detailsRow = document.createElement('tr');
             detailsRow.className = 'details-row';
-            let detailsHtml = '<td colspan="5"><table class="details-table"><thead><tr><th>Test Name</th><th>Status</th><th>Result/Details</th></tr></thead><tbody>';
-
+            let detailsHtml = '<td colspan="3"><table class="details-table"><thead><tr><th>Test Name</th><th>Status</th><th>Result</th></tr></thead><tbody>';
             if (diag.payload.results && diag.payload.results.length > 0) {
                 diag.payload.results.forEach(test => {
-                    const statusClass = test.status === 'PASS' ? 'pass' : (test.status === 'FAIL' ? 'fail' : 'skipped');
-                    // *** FIX: Use test.result for the details column ***
-                    detailsHtml += `<tr>
-                        <td>${test.name}</td>
-                        <td><span class="status-badge ${statusClass}">${test.status}</span></td>
-                        <td>${test.result || 'N/A'}</td>
-                    </tr>`;
+                    detailsHtml += `<tr><td>${test.name}</td><td><span class="status-badge ${test.status.toLowerCase()}">${test.status}</span></td><td>${test.result || 'N/A'}</td></tr>`;
                 });
             } else {
-                detailsHtml += '<tr><td colspan="3">No individual test results available for this entry.</td></tr>';
+                detailsHtml += '<tr><td colspan="3">No individual test results available.</td></tr>';
             }
             detailsHtml += '</tbody></table></td>';
             detailsRow.innerHTML = detailsHtml;
 
-            summaryRow.onclick = () => {
-                const isVisible = detailsRow.style.display === 'table-row';
-                detailsRow.style.display = isVisible ? 'none' : 'table-row';
-            };
+            summaryRow.onclick = () => detailsRow.classList.toggle('show');
 
             tbody.appendChild(summaryRow);
             tbody.appendChild(detailsRow);
         });
+
+        setupPagination(filtered.length);
+    }
+
+    function setupPagination(totalRows) {
+        const pageCount = Math.ceil(totalRows / rowsPerPage);
+        const paginationControls = document.getElementById('pagination-controls');
+        paginationControls.innerHTML = '';
+
+        if (pageCount <= 1) return;
+
+        for (let i = 1; i <= pageCount; i++) {
+            const button = document.createElement('button');
+            button.innerText = i;
+            if (i === currentPage) button.disabled = true;
+            button.onclick = () => {
+                currentPage = i;
+                renderReport();
+            };
+            paginationControls.appendChild(button);
+        }
+    }
+
+    function updateNotifications(users) {
+        const notificationBell = document.getElementById('notification-bell');
+        const countElement = notificationBell.querySelector('.notification-count');
+        const dropdown = notificationBell.querySelector('.notification-dropdown');
+        
+        if (!users || user.role !== 'admin') {
+            notificationBell.style.display = 'none';
+            return;
+        }
+
+        notificationBell.style.display = 'block';
+        const pendingUsers = users.filter(u => u.status === 'pending');
+        dropdown.innerHTML = '';
+
+        if (pendingUsers.length > 0) {
+            countElement.innerText = pendingUsers.length;
+            countElement.style.display = 'block';
+            pendingUsers.forEach(user => {
+                const link = document.createElement('a');
+                link.href = '/users.html';
+                link.innerText = `New signup: ${user.username}`;
+                dropdown.appendChild(link);
+            });
+        } else {
+            countElement.style.display = 'none';
+            dropdown.innerHTML = '<div class="no-notifications">No new notifications</div>';
+        }
     }
 </script>
 

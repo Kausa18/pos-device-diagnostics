@@ -34,18 +34,43 @@ function init(callback) {
             password TEXT,
             role TEXT DEFAULT 'technician',
             status TEXT DEFAULT 'pending',
-            created_at TEXT
+            created_at TEXT,
+            updated_at TEXT
         )
         `);
 
-        // Default Admin
-        db.run(`
-            INSERT OR IGNORE INTO users (username, password, role, status, created_at)
-            VALUES ('admin', 'admin123', 'admin', 'approved', ?)
-        `, [new Date().toISOString()]);
+        const finalize = () => {
+            const now = new Date().toISOString();
+            db.run(`
+                INSERT OR IGNORE INTO users (username, password, role, status, created_at, updated_at)
+                VALUES ('admin', 'admin123', 'admin', 'approved', ?, ?)
+            `, [now, now], (insertErr) => {
+                if (insertErr) {
+                    if (callback) return callback(insertErr);
+                    return;
+                }
+                console.log("Database initialized with Users table.");
+                if (callback) callback();
+            });
+        };
 
-        console.log("Database initialized with Users table.");
-        if (callback) callback();
+        db.all("PRAGMA table_info(users)", [], (err, columns) => {
+            if (err) {
+                if (callback) return callback(err);
+                return;
+            }
+            const hasUpdatedAt = Array.isArray(columns) && columns.some(c => c && c.name === 'updated_at');
+            if (hasUpdatedAt) return finalize();
+
+            db.run("ALTER TABLE users ADD COLUMN updated_at TEXT", [], (alterErr) => {
+                if (alterErr) {
+                    console.error("Failed to migrate users table:", alterErr);
+                    if (callback) return callback(alterErr);
+                    return;
+                }
+                db.run("UPDATE users SET updated_at = COALESCE(updated_at, created_at)", [], () => finalize());
+            });
+        });
     });
 }
 

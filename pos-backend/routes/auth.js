@@ -37,7 +37,7 @@ router.post("/login", (req, res) => {
 
 // GET /auth/users (Admin only)
 router.get("/users", (req, res) => {
-    db.all("SELECT id, username, role, status, created_at FROM users", [], (err, rows) => {
+    db.all("SELECT id, username, role, status, created_at, updated_at FROM users", [], (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(rows);
     });
@@ -47,11 +47,27 @@ router.get("/users", (req, res) => {
 router.patch("/users/:id", (req, res) => {
     const { status, role } = req.body;
     const { id } = req.params;
-    
-    db.run("UPDATE users SET status = COALESCE(?, status), role = COALESCE(?, role) WHERE id = ?", 
-    [status, role, id], function(err) {
+
+    db.run("UPDATE users SET status = COALESCE(?, status), role = COALESCE(?, role), updated_at = ? WHERE id = ?", 
+    [status, role, new Date().toISOString(), id], function(err) {
         if (err) return res.status(500).json({ error: err.message });
         res.json({ status: "updated" });
+    });
+});
+
+router.delete("/users/:id", (req, res) => {
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ error: "User id is required" });
+
+    db.get("SELECT username FROM users WHERE id = ?", [id], (err, row) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (!row) return res.status(404).json({ error: "User not found" });
+        if (row.username === 'admin') return res.status(403).json({ error: "Cannot delete admin user" });
+
+        db.run("DELETE FROM users WHERE id = ?", [id], function(deleteErr) {
+            if (deleteErr) return res.status(500).json({ error: deleteErr.message });
+            res.json({ status: "deleted", id: Number(id) });
+        });
     });
 });
 

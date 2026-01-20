@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Profile - IZYANE Diagnostics</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <style>
+        :root {
+            --primary: #1e88e5; --success: #28a745; --danger: #dc3545; --warning: #f9a825;
+            --bg: #f0f2f5; --card-bg: #ffffff; --text: #2c3e50; --text-muted: #7f8c8d;
+            --sidebar-bg: #1a2a3a; --sidebar-text: #bdc3c7; --sidebar-active: #ffffff;
+        }
+        body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; margin: 0; background: var(--bg); display: flex; }
+        
+        .sidebar { width: 260px; background: var(--sidebar-bg); color: var(--sidebar-text); display: flex; flex-direction: column; height: 100vh; position: fixed; transition: width 0.3s ease; z-index: 200;}
+        .sidebar-brand { padding: 20px; font-size: 20px; font-weight: 900; color: var(--sidebar-active); text-align: center; border-bottom: 1px solid #2c3e50; white-space: nowrap; overflow: hidden; }
+        .sidebar-nav { flex-grow: 1; }
+        .sidebar-nav-section { font-size: 12px; text-transform: uppercase; padding: 20px 20px 10px; font-weight: 700; color: #7f8c8d; overflow: hidden; white-space: nowrap; }
+        .sidebar-nav a { display: flex; align-items: center; gap: 15px; color: var(--sidebar-text); text-decoration: none; padding: 12px 20px; font-weight: 600; transition: 0.2s; border-left: 3px solid transparent; white-space: nowrap; }
+        .sidebar-nav a i { font-size: 22px; min-width: 22px; text-align: center; }
+        .sidebar-nav a:hover { background: #2c3e50; color: var(--sidebar-active); }
+        .sidebar-nav a.active { background: #2c3e50; color: var(--sidebar-active); border-left-color: var(--primary); }
+        .sidebar-toggle { border-top: 1px solid #2c3e50; padding: 15px 0; text-align: center; cursor: pointer; color: var(--sidebar-text); }
+        .sidebar-toggle i { font-size: 24px; transition: transform 0.3s ease; }
+        .sidebar.collapsed { width: 80px; }
+        .sidebar.collapsed .sidebar-brand .link-text, .sidebar.collapsed .sidebar-nav-section, .sidebar.collapsed .link-text { display: none; }
+        .sidebar.collapsed .sidebar-brand { font-size: 14px; }
+        .sidebar.collapsed .sidebar-nav a { justify-content: center; padding: 12px 10px; }
+        .sidebar.collapsed .sidebar-toggle i { transform: rotate(180deg); }
+        
+        .main-content { flex-grow: 1; margin-left: 260px; display: flex; flex-direction: column; transition: margin-left 0.3s ease;}
+        .main-content.collapsed { margin-left: 80px; }
+        .header { background: var(--card-bg); padding: 12px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e0e0e0; position: sticky; top: 0; z-index: 100; }
+        .header-left { flex-grow: 1; }
+        .header-right { display: flex; align-items: center; gap: 20px; }
+
+        .user-profile { position: relative; }
+        .user-profile i { font-size: 28px; cursor: pointer; color: #555; }
+        .profile-dropdown { display: none; position: absolute; top: 140%; right: 0; background: var(--card-bg); border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); min-width: 220px; z-index: 101; padding: 10px; }
+        .user-profile:hover .profile-dropdown { display: block; }
+        .profile-dropdown-header { display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 10px; }
+        .profile-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        .profile-dropdown-header div { font-weight: 600; }
+        .profile-dropdown-links a, .profile-dropdown-links button { display: block; background: none; border: none; text-align: left; width: 100%; padding: 10px; border-radius: 6px; font-size: 14px; color: var(--text); text-decoration: none; cursor: pointer; }
+        .profile-dropdown-links a:hover, .profile-dropdown-links button:hover { background: #f0f2f5; }
+
+        main { padding: 20px; }
+        .card { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); max-width: 600px; margin: auto; }
+        .card-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; color: #555; }
+        input[type="text"], input[type="email"] { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box; }
+        .btn-save { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        .btn-save:disabled { background-color: #ccc; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-brand"><span class="link-text">IZYANE DIAGNOSTICS</span></div>
+    <div class="sidebar-nav">
+        <div class="sidebar-nav-section">Overall Dashboard</div>
+        <a href="dashboard.html" class="active"><i class='bx bxs-dashboard'></i><span class="link-text">Dashboard</span></a>
+
+        <div class="sidebar-nav-section">Device Management</div>
+        <a href="devices.html"><i class='bx bx-desktop'></i><span class="link-text">Devices</span></a>
+        <a href="daily_report.html"><i class='bx bxs-report'></i><span class="link-text">Reports</span></a>
+        <a href="test_logs.html"><i class='bx bx-history'></i><span class="link-text">Test Report Logs</span></a>
+
+        <div class="sidebar-nav-section" id="admin-section">Admin</div>
+        <a href="users.html" id="adminUsersLink"><i class='bx bxs-user-account'></i><span class="link-text">User Management</span></a>
+        <a href="settings.html" id="adminSettingsLink"><i class='bx bxs-cog'></i><span class="link-text">Settings</span></a>
+
+        <div class="sidebar-nav-section">Account</div>
+        <a href="profile.html"><i class='bx bxs-user-circle'></i><span class="link-text">Profile</span></a>
+    </div>
+    <div class="sidebar-toggle" onclick="toggleSidebar()">
+        <i class='bx bx-chevron-left'></i>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="header">
+        <div id="welcomeMessage" style="font-weight: 600; flex-grow: 1;"></div>
+        <div class="header-right">
+             <div class="user-profile">
+                <i class='bx bxs-user-circle'></i>
+                <div class="profile-dropdown">
+                    <div class="profile-dropdown-header">
+                        <img id="profile-avatar-img" src="https://i.pravatar.cc/40" alt="Avatar" class="profile-avatar">
+                        <div>
+                            <span id="profile-username-display" style="font-weight: bold;">User</span>
+                        </div>
+                    </div>
+                    <div class="profile-dropdown-links">
+                        <a href="profile.html">Edit Profile</a>
+                        <button onclick="logout()">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main>
+        <div class="card">
+            <div class="card-title">Edit Profile</div>
+            <div class="form-group" style="text-align: center;">
+                <img id="avatar-preview" src="https://i.pravatar.cc/100" alt="Avatar Preview" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #eee; margin-bottom: 15px;">
+                <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
+                <button onclick="document.getElementById('avatar-upload').click()" class="btn-save" style="background: var(--text-muted);">Change Picture</button>
+            </div>
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username">
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" placeholder="Enter your email">
+            </div>
+            <button class="btn-save" onclick="saveProfile(this)">Save Changes</button>
+        </div>
+    </main>
+</div>
+
+<script>
+    const userStr = sessionStorage.getItem('user');
+    let user;
+    if (!userStr) {
+        window.location.href = '/login.html';
+    } else {
+        user = JSON.parse(userStr);
+        document.getElementById('welcomeMessage').innerText = `Welcome, ${user.username}`;
+        document.getElementById('profile-username-display').innerText = user.username;
+        document.getElementById('username').value = user.username;
+        document.getElementById('email').value = user.email || '';
+        if (user.role !== 'admin') {
+            document.getElementById('adminUsersLink').style.display = 'none';
+        }
+    }
+
+    function toggleSidebar() {
+        const sidebar = document.querySelector(".sidebar");
+        const mainContent = document.querySelector(".main-content");
+        sidebar.classList.toggle("collapsed");
+        mainContent.classList.toggle("collapsed");
+        localStorage.setItem('sidebar-collapsed', sidebar.classList.contains('collapsed'));
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        if (localStorage.getItem('sidebar-collapsed') === 'true') {
+            document.querySelector('.sidebar').classList.add('collapsed');
+            document.querySelector('.main-content').classList.add('collapsed');
+        }
+
+        const savedAvatar = localStorage.getItem(`avatar_${user.username}`);
+        if(savedAvatar) {
+            document.getElementById('profile-avatar-img').src = savedAvatar;
+            document.getElementById('avatar-preview').src = savedAvatar;
+        }
+
+        document.getElementById('avatar-upload').addEventListener('change', function(event) {
+            if (event.target.files && event.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('avatar-preview').src = e.target.result;
+                }
+                reader.readAsDataURL(event.target.files[0]);
+            }
+        });
+    });
+
+    async function saveProfile(btn) {
+        const newUsername = document.getElementById('username').value;
+        const email = document.getElementById('email').value;
+        const fileInput = document.getElementById('avatar-upload');
+
+        btn.disabled = true;
+        btn.innerText = "Saving...";
+
+        let avatarPromise = Promise.resolve();
+
+        if (fileInput.files && fileInput.files[0]) {
+            avatarPromise = new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    // If username changes, we need to re-key the avatar
+                    if(newUsername !== user.username) {
+                        localStorage.removeItem(`avatar_${user.username}`);
+                    }
+                    localStorage.setItem(`avatar_${newUsername}`, e.target.result);
+                    document.getElementById('profile-avatar-img').src = e.target.result;
+                    resolve();
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            });
+        }
+
+        try {
+            await avatarPromise;
+
+            const res = await fetch(`/auth/users/${user.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: newUsername, email })
+            });
+
+            if(res.ok) {
+                // Update local session storage
+                user.username = newUsername;
+                user.email = email;
+                sessionStorage.setItem('user', JSON.stringify(user));
+
+                // Update UI immediately
+                document.getElementById('welcomeMessage').innerText = `Welcome, ${user.username}`;
+                document.getElementById('profile-username-display').innerText = user.username;
+                alert("Profile saved successfully!");
+            } else {
+                alert("Failed to save profile details.");
+            }
+        } catch(e) {
+            alert("An error occurred while saving.");
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "Save Changes";
+        }
+    }
+
+    function logout() {
+        sessionStorage.clear();
+        window.location.href = '/login.html';
+    }
+</script>
+
+</body>
+</html>

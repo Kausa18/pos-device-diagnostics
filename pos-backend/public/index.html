@@ -3,76 +3,228 @@
 <head>
     <meta charset="UTF-8">
     <title>Terminal Details - POS Diagnostics</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 20px; background: #f9f9f9; }
-        .nav { margin-bottom: 20px; }
-        .card { background: white; border: 1px solid #ddd; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        :root {
+            --primary: #1e88e5; --success: #28a745; --danger: #dc3545; --warning: #f9a825;
+            --bg: #f0f2f5; --card-bg: #ffffff; --text: #2c3e50; --text-muted: #7f8c8d;
+            --sidebar-bg: #1a2a3a; --sidebar-text: #bdc3c7; --sidebar-active: #ffffff;
+        }
+        body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; margin: 0; background: var(--bg); display: flex; }
+        
+        /* Sidebar */
+        .sidebar { 
+            width: 260px; 
+            background: var(--sidebar-bg); 
+            color: var(--sidebar-text); 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; 
+            position: fixed; 
+            transition: width 0.3s ease;
+            z-index: 200;
+        }
+        .sidebar-brand { padding: 20px; font-size: 20px; font-weight: 900; color: var(--sidebar-active); text-align: center; border-bottom: 1px solid #2c3e50; white-space: nowrap; overflow: hidden; }
+        .sidebar-nav { flex-grow: 1; }
+        .sidebar-nav-section { font-size: 12px; text-transform: uppercase; padding: 20px 20px 10px; font-weight: 700; color: #7f8c8d; overflow: hidden; white-space: nowrap; }
+        .sidebar-nav a { display: flex; align-items: center; gap: 15px; color: var(--sidebar-text); text-decoration: none; padding: 12px 20px; font-weight: 600; transition: 0.2s; border-left: 3px solid transparent; white-space: nowrap; }
+        .sidebar-nav a i { font-size: 22px; min-width: 22px; text-align: center; }
+        .sidebar-nav a:hover { background: #2c3e50; color: var(--sidebar-active); }
+        .sidebar-nav a.active { background: #2c3e50; color: var(--sidebar-active); border-left-color: var(--primary); }
+
+        .sidebar-toggle {
+            border-top: 1px solid #2c3e50;
+            padding: 15px 0;
+            text-align: center;
+            cursor: pointer;
+            color: var(--sidebar-text);
+        }
+        .sidebar-toggle i { font-size: 24px; transition: transform 0.3s ease; }
+
+        /* Collapsed Sidebar */
+        .sidebar.collapsed { width: 80px; }
+        .sidebar.collapsed .sidebar-brand .link-text, .sidebar.collapsed .sidebar-nav-section, .sidebar.collapsed .link-text { display: none; }
+        .sidebar.collapsed .sidebar-brand { font-size: 14px; }
+        .sidebar.collapsed .sidebar-nav a { justify-content: center; padding: 12px 10px; }
+        .sidebar.collapsed .sidebar-toggle i { transform: rotate(180deg); }
+        
+        /* Main Content */
+        .main-content { 
+            flex-grow: 1; 
+            margin-left: 260px; 
+            display: flex; 
+            flex-direction: column; 
+            transition: margin-left 0.3s ease;
+        }
+        .main-content.collapsed { margin-left: 80px; }
+        .header { background: var(--card-bg); padding: 12px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e0e0e0; position: sticky; top: 0; z-index: 100; }
+        .header-left { flex-grow: 1; }
+        .header-right { display: flex; align-items: center; gap: 20px; }
+
+        .user-profile { position: relative; }
+        .user-profile i { font-size: 28px; cursor: pointer; color: #555; }
+        .profile-dropdown { display: none; position: absolute; top: 140%; right: 0; background: var(--card-bg); border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); min-width: 220px; z-index: 101; padding: 10px; }
+        .user-profile:hover .profile-dropdown { display: block; }
+        .profile-dropdown-header { display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 10px; }
+        .profile-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        .profile-dropdown-header div { font-weight: 600; }
+        .profile-dropdown-links a, .profile-dropdown-links button { display: block; background: none; border: none; text-align: left; width: 100%; padding: 10px; border-radius: 6px; font-size: 14px; color: var(--text); text-decoration: none; cursor: pointer; }
+        .profile-dropdown-links a:hover, .profile-dropdown-links button:hover { background: #f0f2f5; }
+        
+        main { padding: 20px; }
+        .card { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
         .pass { color: #28a745; font-weight: bold; }
         .fail { color: #dc3545; font-weight: bold; }
         .skipped { color: #fd7e14; font-weight: bold; }
         pre { background: #f4f4f4; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 0.9em; }
-        h1, h2 { color: #333; }
+        h2 { color: #333; margin-top: 0; }
         ul { list-style: none; padding: 0; }
         li { padding: 8px 0; border-bottom: 1px solid #eee; }
-        .back-link { text-decoration: none; font-weight: bold; color: #1e88e5; }
     </style>
 </head>
 <body>
 
-<div class="nav">
-    <a href="devices.html" class="back-link">← Back to Device List</a>
+<div class="sidebar">
+    <div class="sidebar-brand"><span class="link-text">IZYANE DIAGNOSTICS</span></div>
+    <div class="sidebar-nav">
+        <div class="sidebar-nav-section">Overall Dashboard</div>
+        <a href="dashboard.html" class="active"><i class='bx bxs-dashboard'></i><span class="link-text">Dashboard</span></a>
+
+        <div class="sidebar-nav-section">Device Management</div>
+        <a href="devices.html"><i class='bx bx-desktop'></i><span class="link-text">Devices</span></a>
+        <a href="daily_report.html"><i class='bx bxs-report'></i><span class="link-text">Reports</span></a>
+        <a href="test_logs.html"><i class='bx bx-history'></i><span class="link-text">Test Report Logs</span></a>
+
+        <div class="sidebar-nav-section" id="admin-section">Admin</div>
+        <a href="users.html" id="adminUsersLink"><i class='bx bxs-user-account'></i><span class="link-text">User Management</span></a>
+        <a href="settings.html" id="adminSettingsLink"><i class='bx bxs-cog'></i><span class="link-text">Settings</span></a>
+
+        <div class="sidebar-nav-section">Account</div>
+        <a href="profile.html"><i class='bx bxs-user-circle'></i><span class="link-text">Profile</span></a>
+    </div>
+    <div class="sidebar-toggle" onclick="toggleSidebar()">
+        <i class='bx bx-chevron-left'></i>
+    </div>
 </div>
 
-<div id="content">
-    <h1>Terminal Detail View</h1>
-    <div id="list">Loading details...</div>
+
+<div class="main-content">
+    <div class="header">
+        <div id="welcomeMessage" style="font-weight: 600; flex-grow: 1;"></div>
+        <div class="header-right">
+             <div class="user-profile">
+                <i class='bx bxs-user-circle'></i>
+                <div class="profile-dropdown">
+                    <div class="profile-dropdown-header">
+                        <img id="profile-avatar-img" src="https://i.pravatar.cc/40" alt="Avatar" class="profile-avatar">
+                        <div>
+                            <span id="profile-username-display" style="font-weight: bold;">User</span>
+                        </div>
+                    </div>
+                    <div class="profile-dropdown-links">
+                        <a href="profile.html">Edit Profile</a>
+                        <button onclick="logout()">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main>
+        <div id="list">Loading details...</div>
+    </main>
 </div>
 
 <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const terminalId = urlParams.get('terminal_id');
-
-    if (!terminalId) {
-        document.getElementById("list").innerHTML = "<h3>Error: No Terminal ID specified.</h3><p>Please select a device from the device list.</p>";
+    const userStr = sessionStorage.getItem('user');
+    let user;
+    if (!userStr) {
+        window.location.href = '/login.html';
     } else {
-        fetch(`/diagnostics?terminal_id=${terminalId}`)
-            .then(res => res.json())
-            .then(data => {
-                const list = document.getElementById("list");
-                if (data.length === 0) {
-                    list.innerHTML = `<p>No diagnostic history found for <strong>${terminalId}</strong>.</p>`;
-                    return;
-                }
+        user = JSON.parse(userStr);
+        document.getElementById('welcomeMessage').innerText = `Welcome, ${user.username}`;
+        document.getElementById('profile-username-display').innerText = user.username;
+        const savedAvatar = localStorage.getItem(`avatar_${user.username}`);
+        if(savedAvatar) {
+            document.getElementById('profile-avatar-img').src = savedAvatar;
+        }
 
-                list.innerHTML = `<h2>History for: ${terminalId}</h2>`;
+        if (user.role !== 'admin') {
+            const adminElements = document.querySelectorAll('#admin-section, #adminUsersLink, #adminSettingsLink');
+            adminElements.forEach(el => el.style.display = 'none');
+        }
+    }
 
-                data.forEach(item => {
-                    const div = document.createElement("div");
-                    div.className = "card";
-                    
-                    let resultsHtml = '<h4>Test Results:</h4><ul>';
-                    item.payload.results.forEach(result => {
-                        const statusClass = result.status.toLowerCase();
-                        resultsHtml += `<li class="${statusClass}"><strong>${result.name}:</strong> ${result.status} - ${result.details}</li>`;
+    function toggleSidebar() {
+        const sidebar = document.querySelector(".sidebar");
+        const mainContent = document.querySelector(".main-content");
+        sidebar.classList.toggle("collapsed");
+        mainContent.classList.toggle("collapsed");
+        localStorage.setItem('sidebar-collapsed', sidebar.classList.contains('collapsed'));
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        if (localStorage.getItem('sidebar-collapsed') === 'true') {
+            document.querySelector('.sidebar').classList.add('collapsed');
+            document.querySelector('.main-content').classList.add('collapsed');
+        }
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const terminalId = urlParams.get('terminal_id');
+
+        if (!terminalId) {
+            document.getElementById("list").innerHTML = "<h3>Error: No Terminal ID specified.</h3><p>Please select a device from the <a href='devices.html'>device list</a>.</p>";
+        } else {
+            fetch(`/diagnostics?terminal_id=${terminalId}`)
+                .then(res => res.json())
+                .then(data => {
+                    const list = document.getElementById("list");
+                    if (data.length === 0) {
+                        list.innerHTML = `<p>No diagnostic history found for <strong>${terminalId}</strong>.</p>`;
+                        return;
+                    }
+
+                    list.innerHTML = `<h2>History for: ${terminalId}</h2>`;
+
+                    data.sort((a, b) => new Date(b.receivedAt) - new Date(a.receivedAt));
+
+                    data.forEach(item => {
+                        const div = document.createElement("div");
+                        div.className = "card";
+                        
+                        let resultsHtml = '<h4>Test Results:</h4><ul>';
+                        if(item.payload.results && item.payload.results.length > 0) {
+                            item.payload.results.forEach(result => {
+                                const statusClass = result.status.toLowerCase();
+                                resultsHtml += `<li class="${statusClass}"><strong>${result.name}:</strong> ${result.status} - ${result.details || 'N/A'}</li>`;
+                            });
+                        } else {
+                            resultsHtml += '<li>No individual test results available.</li>';
+                        }
+                        resultsHtml += '</ul>';
+                        
+                        div.innerHTML = `
+                            <strong>Received:</strong> ${new Date(item.receivedAt).toLocaleString()}<br/>
+                            <strong>Status:</strong> <span class="${item.summaryStatus}">${item.summaryStatus.toUpperCase()}</span><br/>
+                            <strong>Device:</strong> ${item.payload.manufacturer} ${item.payload.model}<br/>
+                            ${resultsHtml}
+                            <details>
+                                <summary>View Raw JSON</summary>
+                                <pre>${JSON.stringify(item.payload, null, 2)}</pre>
+                            </details>
+                        `;
+                        list.appendChild(div);
                     });
-                    resultsHtml += '</ul>';
-                    
-                    div.innerHTML = `
-                        <strong>Received:</strong> ${new Date(item.receivedAt).toLocaleString()}<br/>
-                        <strong>Status:</strong> <span class="${item.summaryStatus}">${item.summaryStatus.toUpperCase()}</span><br/>
-                        <strong>Device:</strong> ${item.payload.manufacturer} ${item.payload.model}<br/>
-                        ${resultsHtml}
-                        <details>
-                            <summary>View Raw JSON</summary>
-                            <pre>${JSON.stringify(item.payload, null, 2)}</pre>
-                        </details>
-                    `;
-                    list.appendChild(div);
+                })
+                .catch(err => {
+                    document.getElementById("list").innerText = "Failed to load data.";
                 });
-            })
-            .catch(err => {
-                document.getElementById("list").innerText = "Failed to load data.";
-            });
+        }
+    });
+
+    function logout() {
+        sessionStorage.clear();
+        window.location.href = '/login.html';
     }
 </script>
 </body>

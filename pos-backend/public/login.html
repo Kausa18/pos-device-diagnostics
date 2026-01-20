@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Login - POS Diagnostics</title>
+    <title>Login - IZYANE DIAGNOSTICS</title>
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f0f2f5; }
         .login-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 350px; text-align: center; }
@@ -49,6 +49,13 @@
         "See Everything. Fix Anything.",
         "Smarter POS Support."
     ];
+    const API_BASE = (() => {
+        const saved = localStorage.getItem('apiBase');
+        if (saved && typeof saved === 'string') return saved.replace(/\/$/, '');
+        if (window.location.protocol === 'file:') return 'http://localhost:4000';
+        if (window.location.port && window.location.port !== '4000') return 'http://localhost:4000';
+        return '';
+    })();
     let punchlineIndex = 0;
     const punchlineEl = document.getElementById('punchline');
 
@@ -93,12 +100,18 @@
         errorDiv.style.display = 'none';
 
         try {
-            const res = await fetch('/auth/login', {
+            const res = await fetch(`${API_BASE}/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })
             });
-            const data = await res.json();
+            let data;
+            const ct = (res.headers.get('content-type') || '').toLowerCase();
+            if (ct.includes('application/json')) {
+                data = await res.json();
+            } else {
+                data = { error: await res.text() };
+            }
 
             if (res.ok) {
                 sliderText.innerText = "Success";
@@ -110,7 +123,7 @@
             } else {
                 sliderText.innerText = "Fail";
                 container.style.background = "#cc0000"; // Red
-                errorDiv.innerText = data.error;
+                errorDiv.innerText = data.error || 'Login failed';
                 errorDiv.style.display = 'block';
                 setTimeout(() => {
                     slider.style.left = '0px';
@@ -121,7 +134,7 @@
         } catch (e) {
             sliderText.innerText = "Fail";
             container.style.background = "#cc0000"; // Red
-            errorDiv.innerText = "Server error. Try again later.";
+            errorDiv.innerText = e && e.message ? e.message : "Server error. Try again later.";
             errorDiv.style.display = 'block';
             setTimeout(() => {
                 slider.style.left = '0px';

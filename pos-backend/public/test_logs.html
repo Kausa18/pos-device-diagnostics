@@ -3,16 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <title>Test Logs & Reports</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <style>
         :root {
             --primary: #1e88e5; --success: #28a745; --danger: #dc3545; --warning: #f9a825;
             --bg: #f0f2f5; --card-bg: #ffffff; --text: #2c3e50; --text-muted: #7f8c8d;
+            --sidebar-bg: #1a2a3a; --sidebar-text: #bdc3c7; --sidebar-active: #ffffff;
         }
-        body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; margin: 0; background: var(--bg); }
-        .header { background: var(--card-bg); padding: 12px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e0e0e0; }
-        .header a { color: var(--primary); text-decoration: none; font-weight: 700; }
-        .container { max-width: 1200px; margin: 20px auto; padding: 20px; background: var(--card-bg); border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        h1 { color: var(--text); }
+        body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; margin: 0; background: var(--bg); display: flex; }
+        
+        /* Sidebar */
+        .sidebar { 
+            width: 260px; 
+            background: var(--sidebar-bg); 
+            color: var(--sidebar-text); 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; 
+            position: fixed; 
+            transition: width 0.3s ease;
+            z-index: 200;
+        }
+        .sidebar-brand { padding: 20px; font-size: 20px; font-weight: 900; color: var(--sidebar-active); text-align: center; border-bottom: 1px solid #2c3e50; white-space: nowrap; overflow: hidden; }
+        .sidebar-nav { flex-grow: 1; }
+        .sidebar-nav-section { font-size: 12px; text-transform: uppercase; padding: 20px 20px 10px; font-weight: 700; color: #7f8c8d; overflow: hidden; white-space: nowrap; }
+        .sidebar-nav a { display: flex; align-items: center; gap: 15px; color: var(--sidebar-text); text-decoration: none; padding: 12px 20px; font-weight: 600; transition: 0.2s; border-left: 3px solid transparent; white-space: nowrap; }
+        .sidebar-nav a i { font-size: 22px; min-width: 22px; text-align: center; }
+        .sidebar-nav a:hover { background: #2c3e50; color: var(--sidebar-active); }
+        .sidebar-nav a.active { background: #2c3e50; color: var(--sidebar-active); border-left-color: var(--primary); }
+
+        .sidebar-toggle {
+            border-top: 1px solid #2c3e50;
+            padding: 15px 0;
+            text-align: center;
+            cursor: pointer;
+            color: var(--sidebar-text);
+        }
+        .sidebar-toggle i { font-size: 24px; transition: transform 0.3s ease; }
+
+        /* Collapsed Sidebar */
+        .sidebar.collapsed { width: 80px; }
+        .sidebar.collapsed .sidebar-brand .link-text, .sidebar.collapsed .sidebar-nav-section, .sidebar.collapsed .link-text { display: none; }
+        .sidebar.collapsed .sidebar-brand { font-size: 14px; }
+        .sidebar.collapsed .sidebar-nav a { justify-content: center; padding: 12px 10px; }
+        .sidebar.collapsed .sidebar-toggle i { transform: rotate(180deg); }
+        
+        /* Main Content */
+        .main-content { 
+            flex-grow: 1; 
+            margin-left: 260px; 
+            display: flex; 
+            flex-direction: column; 
+            transition: margin-left 0.3s ease;
+        }
+        .main-content.collapsed { margin-left: 80px; }
+        .header { background: var(--card-bg); padding: 12px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e0e0e0; position: sticky; top: 0; z-index: 100; }
+        .header-left { flex-grow: 1; }
+        .header-right { display: flex; align-items: center; gap: 25px; }
+
+        .user-profile, .notification-container { position: relative; }
+        .user-profile > i, .notification-container > i { font-size: 28px; cursor: pointer; color: #555; }
+        
+        .profile-dropdown, .notification-dropdown { display: none; position: absolute; top: 140%; right: 0; background: var(--card-bg); border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); min-width: 220px; z-index: 101; padding: 10px; }
+        .profile-dropdown.show, .notification-dropdown.show { display: block; }
+        
+        .profile-dropdown-header { display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 10px; }
+        .profile-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        .profile-dropdown-header div { font-weight: 600; }
+        .profile-dropdown-links a, .profile-dropdown-links button { display: block; background: none; border: none; text-align: left; width: 100%; padding: 10px; border-radius: 6px; font-size: 14px; color: var(--text); text-decoration: none; cursor: pointer; }
+        .profile-dropdown-links a:hover, .profile-dropdown-links button:hover { background: #f0f2f5; }
+
+        .notification-count { display: none; position: absolute; top: -5px; right: -8px; background: var(--danger); color: white; border-radius: 50%; padding: 2px 6px; font-size: 11px; font-weight: bold; }
+        .notification-dropdown a { display: block; padding: 10px 15px; font-size: 14px; color: var(--text); text-decoration: none; border-bottom: 1px solid #f0f0f0; }
+        .notification-dropdown a:last-child { border-bottom: none; }
+        .notification-dropdown a:hover { background: #f8f9fa; }
+        .no-notifications { padding: 15px; color: var(--text-muted); font-style: italic; }
+
+        main { padding: 20px; }
+        .card { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .card-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
 
         .main-table { width: 100%; border-collapse: collapse; }
         .main-table th, .main-table td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
@@ -24,50 +93,150 @@
 </head>
 <body>
 
-<div class="header">
-    <h1>Test Logs & Reports</h1>
-    <a href="dashboard.html">&larr; Back to Dashboard</a>
+<div class="sidebar">
+    <div class="sidebar-brand"><span class="link-text">IZYANE DIAGNOSTICS</span></div>
+    <div class="sidebar-nav">
+        <div class="sidebar-nav-section">Overall Dashboard</div>
+        <a href="dashboard.html"><i class='bx bxs-dashboard'></i><span class="link-text">Dashboard</span></a>
+
+        <div class="sidebar-nav-section">Device Management</div>
+        <a href="devices.html"><i class='bx bx-desktop'></i><span class="link-text">Devices</span></a>
+        <a href="daily_report.html"><i class='bx bxs-report'></i><span class="link-text">Reports</span></a>
+        <a href="test_logs.html" class="active"><i class='bx bx-history'></i><span class="link-text">Test Report Logs</span></a>
+        
+        <div class="sidebar-nav-section" id="admin-section">Admin</div>
+        <a href="users.html" id="adminUsersLink"><i class='bx bxs-user-account'></i><span class="link-text">User Management</span></a>
+        <a href="settings.html" id="adminSettingsLink"><i class='bx bxs-cog'></i><span class="link-text">Settings</span></a>
+
+        <div class="sidebar-nav-section">Account</div>
+        <a href="profile.html"><i class='bx bxs-user-circle'></i><span class="link-text">Profile</span></a>
+    </div>
+    <div class="sidebar-toggle" onclick="toggleSidebar()">
+        <i class='bx bx-chevron-left'></i>
+    </div>
 </div>
 
-<div class="container">
-    <h1>Download Device Logs</h1>
-    <p>Click the button next to any device to download its complete diagnostic history as a CSV file.</p>
-    <table class="main-table">
-        <thead>
-            <tr>
-                <th>Terminal ID</th>
-                <th>Manufacturer</th>
-                <th>Model</th>
-                <th>Last Seen</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody id="terminals-body"></tbody>
-    </table>
+<div class="main-content">
+    <div class="header">
+        <div id="welcomeMessage" style="font-weight: 600; flex-grow: 1;"></div>
+        <div class="header-right">
+            <div class="notification-container" id="notification-bell" style="display: none;">
+                <i class='bx bxs-bell'></i>
+                <span class="notification-count">0</span>
+                <div class="notification-dropdown">
+                    <!-- Pending users populated by JS -->
+                </div>
+            </div>
+            <div class="user-profile">
+                <i class='bx bxs-user-circle'></i>
+                <div class="profile-dropdown">
+                    <div class="profile-dropdown-header">
+                        <img id="profile-avatar-img" src="https://i.pravatar.cc/40" alt="Avatar" class="profile-avatar">
+                        <div>
+                            <span id="profile-username-display" style="font-weight: bold;">User</span>
+                        </div>
+                    </div>
+                    <div class="profile-dropdown-links">
+                        <a href="profile.html">Edit Profile</a>
+                        <button onclick="logout()">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main>
+        <div class="card">
+            <div class="card-title">Download Device Logs</div>
+            <p>Click the button next to any device to download its complete diagnostic history as a CSV file.</p>
+            <table class="main-table">
+                <thead>
+                    <tr>
+                        <th>Terminal ID</th>
+                        <th>Manufacturer</th>
+                        <th>Model</th>
+                        <th>Last Seen</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="terminals-body"></tbody>
+            </table>
+        </div>
+    </main>
 </div>
 
+<script src="/js/data_fetcher.js"></script>
 <script>
-    const API_KEY = "supersecret123";
-    let allDiagnostics = []; // Store all diagnostics to prevent re-fetching
+    const userStr = sessionStorage.getItem('user');
+    let user;
+    let allDiagnostics = [];
+
+    if (!userStr) {
+        window.location.href = '/login.html';
+    } else {
+        user = JSON.parse(userStr);
+        document.getElementById('welcomeMessage').innerText = `Welcome, ${user.username}`;
+        document.getElementById('profile-username-display').innerText = user.username;
+        const savedAvatar = localStorage.getItem(`avatar_${user.username}`);
+        if(savedAvatar) {
+            document.getElementById('profile-avatar-img').src = savedAvatar;
+        }
+
+        if (user.role !== 'admin') {
+            const adminElements = document.querySelectorAll('#admin-section, #adminUsersLink, #adminSettingsLink');
+            adminElements.forEach(el => el.style.display = 'none');
+        }
+    }
+
+    function logout() {
+        sessionStorage.clear();
+        window.location.href = '/login.html';
+    }
+
+    function toggleSidebar() {
+        const sidebar = document.querySelector(".sidebar");
+        const mainContent = document.querySelector(".main-content");
+        sidebar.classList.toggle("collapsed");
+        mainContent.classList.toggle("collapsed");
+        localStorage.setItem('sidebar-collapsed', sidebar.classList.contains('collapsed'));
+    }
 
     document.addEventListener('DOMContentLoaded', async () => {
+        if (localStorage.getItem('sidebar-collapsed') === 'true') {
+            document.querySelector('.sidebar').classList.add('collapsed');
+            document.querySelector('.main-content').classList.add('collapsed');
+        }
+
         try {
-            // Fetch all data on page load
-            const [terminalsRes, diagsRes] = await Promise.all([
-                fetch(`/terminals?api_key=${API_KEY}`),
-                fetch(`/diagnostics?api_key=${API_KEY}`)
-            ]);
-
-            if (!terminalsRes.ok || !diagsRes.ok) throw new Error('Failed to fetch initial data.');
-
-            const terminals = await terminalsRes.json();
-            allDiagnostics = await diagsRes.json();
-            
+            const [terminals, diagnostics] = await Promise.all([fetchTerminals(), fetchDiagnostics()]);
+            allDiagnostics = diagnostics;
             renderTable(terminals);
+            if(user.role === 'admin') {
+                const users = await fetchUsers();
+                updateNotifications(users);
+            }
         } catch (error) {
             console.error("Error loading page data:", error);
             document.getElementById('terminals-body').innerHTML = `<tr><td colspan="5">Error loading device list.</td></tr>`;
         }
+
+        // Dropdown Toggle Logic
+        document.querySelectorAll('.user-profile, .notification-container').forEach(container => {
+            const i = container.querySelector('i');
+            const dropdown = container.querySelector('.profile-dropdown, .notification-dropdown');
+            i.addEventListener('click', (event) => {
+                if(dropdown) dropdown.classList.toggle('show');
+                event.stopPropagation();
+            });
+        });
+
+        window.addEventListener('click', () => {
+            document.querySelectorAll('.profile-dropdown, .notification-dropdown').forEach(dropdown => {
+                if (dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                }
+            });
+        });
     });
 
     function renderTable(terminals) {
@@ -114,13 +283,11 @@
                     csvContent += row.join(',') + '\r\n';
                 });
             } else {
-                // Create a row even if there are no sub-tests
                  const row = [ timestamp, `"${terminalId}"`, `"${overallStatus}"`, 'No Sub-tests', 'N/A', 'N/A'];
                  csvContent += row.join(',') + '\r\n';
             }
         });
 
-        // Create a hidden link to trigger the download
         const encodedUri = encodeURI("data:text/csv;charset=utf-8," + csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
@@ -128,6 +295,35 @@
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    }
+
+    function updateNotifications(users) {
+        const notificationBell = document.getElementById('notification-bell');
+        const countElement = notificationBell.querySelector('.notification-count');
+        const dropdown = notificationBell.querySelector('.notification-dropdown');
+        
+        if (!users || user.role !== 'admin') {
+            notificationBell.style.display = 'none';
+            return;
+        }
+
+        notificationBell.style.display = 'block';
+        const pendingUsers = users.filter(u => u.status === 'pending');
+        dropdown.innerHTML = '';
+
+        if (pendingUsers.length > 0) {
+            countElement.innerText = pendingUsers.length;
+            countElement.style.display = 'block';
+            pendingUsers.forEach(user => {
+                const link = document.createElement('a');
+                link.href = '/users.html';
+                link.innerText = `New signup: ${user.username}`;
+                dropdown.appendChild(link);
+            });
+        } else {
+            countElement.style.display = 'none';
+            dropdown.innerHTML = '<div class="no-notifications">No new notifications</div>';
+        }
     }
 </script>
 

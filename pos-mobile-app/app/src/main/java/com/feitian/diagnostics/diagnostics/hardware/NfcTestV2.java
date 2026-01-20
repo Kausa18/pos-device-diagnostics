@@ -59,6 +59,6 @@ public class NfcTestV2 implements DiagnosticTest {
     }
 
     public static String getPrompt() {
-        return "\nNFC TAP TEST:\n>>> PLEASE TAP A BANK CARD ON THE SENSOR NOW (10s) <<<\n";
+        return "\nNFC TAP TEST:\nPLEASE TAP A BANK CARD ON THE SENSOR NOW (10s timeout)...\n";
     }
 }

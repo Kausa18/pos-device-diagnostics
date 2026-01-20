@@ -3,33 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <title>POS Fleet Registry - Diagnostics</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <style>
         :root {
-            --primary: #1e88e5;
+            --primary: #1e88e5; --success: #28a745; --danger: #dc3545; --warning: #f9a825;
+            --bg: #f0f2f5; --card-bg: #ffffff; --text: #2c3e50; --text-muted: #7f8c8d;
+            --sidebar-bg: #1a2a3a; --sidebar-text: #bdc3c7; --sidebar-active: #ffffff;
         }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; background: #f0f2f5; color: #333; }
-        .header { 
-            background: rgba(255, 255, 255, 0.9); 
-            backdrop-filter: blur(10px);
-            padding: 12px 40px; 
+        body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; margin: 0; background: var(--bg); display: flex; }
+        
+        /* Sidebar */
+        .sidebar { 
+            width: 260px; 
+            background: var(--sidebar-bg); 
+            color: var(--sidebar-text); 
             display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            flex-direction: column; 
+            height: 100vh; 
+            position: fixed; 
+            transition: width 0.3s ease;
+            z-index: 200;
         }
-        .brand { font-weight: 900; color: var(--primary); letter-spacing: 1px; }
-        .nav-links a { color: var(--primary); text-decoration: none; font-size: 14px; font-weight: 700; margin-left: 20px; }
-        .btn-logout { background: #f8f9fa; border: 1px solid #ddd; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.2s; }
-        .btn-logout:hover { background: #fee; color: #c00; border-color: #fcc; }
+        .sidebar-brand { padding: 20px; font-size: 20px; font-weight: 900; color: var(--sidebar-active); text-align: center; border-bottom: 1px solid #2c3e50; white-space: nowrap; overflow: hidden; }
+        .sidebar-nav { flex-grow: 1; }
+        .sidebar-nav-section { font-size: 12px; text-transform: uppercase; padding: 20px 20px 10px; font-weight: 700; color: #7f8c8d; overflow: hidden; white-space: nowrap; }
+        .sidebar-nav a { display: flex; align-items: center; gap: 15px; color: var(--sidebar-text); text-decoration: none; padding: 12px 20px; font-weight: 600; transition: 0.2s; border-left: 3px solid transparent; white-space: nowrap; }
+        .sidebar-nav a i { font-size: 22px; min-width: 22px; text-align: center; }
+        .sidebar-nav a:hover { background: #2c3e50; color: var(--sidebar-active); }
+        .sidebar-nav a.active { background: #2c3e50; color: var(--sidebar-active); border-left-color: var(--primary); }
 
-        .container { max-width: 1300px; margin: 30px auto; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .sidebar-toggle {
+            border-top: 1px solid #2c3e50;
+            padding: 15px 0;
+            text-align: center;
+            cursor: pointer;
+            color: var(--sidebar-text);
+        }
+        .sidebar-toggle i { font-size: 24px; transition: transform 0.3s ease; }
+
+        /* Collapsed Sidebar */
+        .sidebar.collapsed { width: 80px; }
+        .sidebar.collapsed .sidebar-brand .link-text, .sidebar.collapsed .sidebar-nav-section, .sidebar.collapsed .link-text { display: none; }
+        .sidebar.collapsed .sidebar-brand { font-size: 14px; }
+        .sidebar.collapsed .sidebar-nav a { justify-content: center; padding: 12px 10px; }
+        .sidebar.collapsed .sidebar-toggle i { transform: rotate(180deg); }
+        
+        /* Main Content */
+        .main-content { 
+            flex-grow: 1; 
+            margin-left: 260px; 
+            display: flex; 
+            flex-direction: column; 
+            transition: margin-left 0.3s ease;
+        }
+        .main-content.collapsed { margin-left: 80px; }
+        .header { background: var(--card-bg); padding: 12px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e0e0e0; position: sticky; top: 0; z-index: 100; }
+        .header-left { flex-grow: 1; }
+        .header-right { display: flex; align-items: center; gap: 25px; }
+
+        .user-profile, .notification-container { position: relative; }
+        .user-profile > i, .notification-container > i { font-size: 28px; cursor: pointer; color: #555; }
+        
+        .profile-dropdown, .notification-dropdown { display: none; position: absolute; top: 140%; right: 0; background: var(--card-bg); border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); min-width: 220px; z-index: 101; padding: 10px; }
+        .profile-dropdown.show, .notification-dropdown.show { display: block; }
+        
+        .profile-dropdown-header { display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 10px; }
+        .profile-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        .profile-dropdown-header div { font-weight: 600; }
+        .profile-dropdown-links a, .profile-dropdown-links button { display: block; background: none; border: none; text-align: left; width: 100%; padding: 10px; border-radius: 6px; font-size: 14px; color: var(--text); text-decoration: none; cursor: pointer; }
+        .profile-dropdown-links a:hover, .profile-dropdown-links button:hover { background: #f0f2f5; }
+
+        .notification-count { display: none; position: absolute; top: -5px; right: -8px; background: var(--danger); color: white; border-radius: 50%; padding: 2px 6px; font-size: 11px; font-weight: bold; }
+        .notification-dropdown a { display: block; padding: 10px 15px; font-size: 14px; color: var(--text); text-decoration: none; border-bottom: 1px solid #f0f0f0; }
+        .notification-dropdown a:last-child { border-bottom: none; }
+        .notification-dropdown a:hover { background: #f8f9fa; }
+        .no-notifications { padding: 15px; color: var(--text-muted); font-style: italic; }
+
+        main { padding: 20px; }
+        .card { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         
         .filters { display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; }
         .filter-pill { padding: 8px 16px; background: #e9ecef; border: 1px solid #ddd; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: 600; transition: 0.2s; }
-        .filter-pill.active { background: #1e88e5; color: white; border-color: #1e88e5; }
+        .filter-pill.active { background: var(--primary); color: white; border-color: var(--primary); }
         
         .search-box { flex-grow: 1; margin-bottom: 20px; }
         input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
@@ -43,89 +98,197 @@
         .fail { color: #c62828; background: #ffebee; }
         .none { color: #757575; background: #f5f5f5; }
 
-        .view-link { color: #1e88e5; text-decoration: none; font-weight: bold; }
+        .view-link { color: var(--primary); text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <div class="brand">POS.LOCAL</div>
-    <div class="nav-links">
-        <a href="dashboard.html">Dashboard</a>
-        <a href="devices.html">Devices</a>
-        <span id="adminLinks"></span>
-        <button class="btn-logout" onclick="logout()">LOGOUT</button>
+<div class="sidebar">
+    <div class="sidebar-brand"><span class="link-text">IZYANE DIAGNOSTICS</span></div>
+    <div class="sidebar-nav">
+        <div class="sidebar-nav-section">Overall Dashboard</div>
+        <a href="dashboard.html"><i class='bx bxs-dashboard'></i><span class="link-text">Dashboard</span></a>
+
+        <div class="sidebar-nav-section">Device Management</div>
+        <a href="devices.html" class="active"><i class='bx bx-desktop'></i><span class="link-text">Devices</span></a>
+        <a href="daily_report.html"><i class='bx bxs-report'></i><span class="link-text">Reports</span></a>
+        <a href="test_logs.html"><i class='bx bx-history'></i><span class="link-text">Test Report Logs</span></a>
+        
+        <div class="sidebar-nav-section" id="admin-section">Admin</div>
+        <a href="users.html" id="adminUsersLink"><i class='bx bxs-user-account'></i><span class="link-text">User Management</span></a>
+        <a href="settings.html" id="adminSettingsLink"><i class='bx bxs-cog'></i><span class="link-text">Settings</span></a>
+
+        <div class="sidebar-nav-section">Account</div>
+        <a href="profile.html"><i class='bx bxs-user-circle'></i><span class="link-text">Profile</span></a>
+    </div>
+    <div class="sidebar-toggle" onclick="toggleSidebar()">
+        <i class='bx bx-chevron-left'></i>
     </div>
 </div>
 
-<div class="container">
-    <div class="search-box">
-        <input type="text" id="searchInput" placeholder="Search Terminal ID..." onkeyup="processData()">
+<div class="main-content">
+    <div class="header">
+        <div id="welcomeMessage" style="font-weight: 600; flex-grow: 1;"></div>
+        <div class="header-right">
+            <div class="notification-container" id="notification-bell" style="display: none;">
+                <i class='bx bxs-bell'></i>
+                <span class="notification-count">0</span>
+                <div class="notification-dropdown">
+                    <!-- Pending users populated by JS -->
+                </div>
+            </div>
+            <div class="user-profile">
+                <i class='bx bxs-user-circle'></i>
+                <div class="profile-dropdown">
+                    <div class="profile-dropdown-header">
+                        <img id="profile-avatar-img" src="https://i.pravatar.cc/40" alt="Avatar" class="profile-avatar">
+                        <div>
+                            <span id="profile-username-display" style="font-weight: bold;">User</span>
+                        </div>
+                    </div>
+                    <div class="profile-dropdown-links">
+                        <a href="profile.html">Edit Profile</a>
+                        <button onclick="logout()">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="filters">
-        <div class="filter-pill active" data-filter="all" onclick="setFilter(this)">All Devices</div>
-        <div class="filter-pill" data-filter="pass" onclick="setFilter(this)">Passed Terminals</div>
-        <div class="filter-pill" data-filter="failed" onclick="setFilter(this)">Failed Terminals</div>
-        <div class="filter-pill" data-filter="recent" onclick="setFilter(this)">Last 24 Hours</div>
-        <div class="filter-pill" data-filter="none" onclick="setFilter(this)">Not Tested</div>
-    </div>
+    <main>
+        <div class="card">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search Terminal ID..." onkeyup="processData()">
+            </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Terminal ID</th>
-                <th>Manufacturer</th>
-                <th>Model</th>
-                <th>Last Diagnostic</th>
-                <th>Overall Status</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody id="deviceTable"></tbody>
-    </table>
+            <div class="filters">
+                <div class="filter-pill" data-filter="all" onclick="setFilter(this)">All Devices</div>
+                <div class="filter-pill" data-filter="pass" onclick="setFilter(this)">Passed Terminals</div>
+                <div class="filter-pill" data-filter="failed" onclick="setFilter(this)">Failed Terminals</div>
+                <div class="filter-pill active" data-filter="recent" onclick="setFilter(this)">Last 24 Hours</div>
+                <div class="filter-pill" data-filter="none" onclick="setFilter(this)">Not Tested</div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Terminal ID</th>
+                        <th>Manufacturer</th>
+                        <th>Model</th>
+                        <th>Last Diagnostic</th>
+                        <th>Overall Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="deviceTable"></tbody>
+            </table>
+        </div>
+    </main>
 </div>
 
 <script>
-    // Ensure session exists
     const userStr = sessionStorage.getItem('user');
-    if (!userStr) window.location.href = '/login.html';
-    const user = JSON.parse(userStr);
-
-    if (user.role === 'admin') {
-        document.getElementById('adminLinks').innerHTML = `<a href="/users.html">Users</a>`;
-    }
-
+    let user;
     let rawData = [];
-    let currentFilter = 'all';
+    let currentFilter = 'recent';
     const API_KEY = "supersecret123";
 
-    document.addEventListener('DOMContentLoaded', () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const statusFilter = urlParams.get('status');
-        const generalFilter = urlParams.get('filter');
-        const preFilter = statusFilter || generalFilter;
+    if (!userStr) {
+        window.location.href = '/login.html';
+    } else {
+        user = JSON.parse(userStr);
+        document.getElementById('welcomeMessage').innerText = `Welcome, ${user.username}`;
+        document.getElementById('profile-username-display').innerText = user.username;
+        const savedAvatar = localStorage.getItem(`avatar_${user.username}`);
+        if(savedAvatar) {
+            document.getElementById('profile-avatar-img').src = savedAvatar;
+        }
 
-        if (preFilter) {
-            const filterPill = document.querySelector(`.filter-pill[data-filter='${preFilter}']`);
-            if (filterPill) setFilter(filterPill);
+        if (user.role !== 'admin') {
+            const adminElements = document.querySelectorAll('#admin-section, #adminUsersLink, #adminSettingsLink');
+            adminElements.forEach(el => el.style.display = 'none');
+        }
+    }
+
+    function logout() {
+        sessionStorage.clear();
+        window.location.href = '/login.html';
+    }
+
+    function toggleSidebar() {
+        const sidebar = document.querySelector(".sidebar");
+        const mainContent = document.querySelector(".main-content");
+        sidebar.classList.toggle("collapsed");
+        mainContent.classList.toggle("collapsed");
+        localStorage.setItem('sidebar-collapsed', sidebar.classList.contains('collapsed'));
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        if (localStorage.getItem('sidebar-collapsed') === 'true') {
+            document.querySelector('.sidebar').classList.add('collapsed');
+            document.querySelector('.main-content').classList.add('collapsed');
+        }
+        const urlParams = new URLSearchParams(window.location.search);
+        const filter = urlParams.get('filter');
+        
+        const filterPill = document.querySelector(`.filter-pill[data-filter='${filter}']`);
+        if (filterPill) {
+            setFilter(filterPill);
+        } else {
+            const defaultPill = document.querySelector(".filter-pill[data-filter='recent']");
+            setFilter(defaultPill);
         }
 
         loadData();
+        setInterval(loadData, 5000);
+
+        // Dropdown Toggle Logic
+        document.querySelectorAll('.user-profile, .notification-container').forEach(container => {
+            const i = container.querySelector('i');
+            const dropdown = container.querySelector('.profile-dropdown, .notification-dropdown');
+            i.addEventListener('click', (event) => {
+                if(dropdown) dropdown.classList.toggle('show');
+                event.stopPropagation();
+            });
+        });
+
+        window.addEventListener('click', () => {
+            document.querySelectorAll('.profile-dropdown, .notification-dropdown').forEach(dropdown => {
+                if (dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                }
+            });
+        });
     });
 
     async function loadData() {
         try {
-            const res = await fetch(`/terminals?api_key=${API_KEY}`);
-            if (!res.ok) throw new Error("Unauthorized");
-            rawData = await res.json();
-            processData();
+            const promises = [fetch(`/terminals?api_key=${API_KEY}`)];
+            if (user.role === 'admin') {
+                promises.push(fetch(`/auth/users`));
+            }
+            
+            const results = await Promise.allSettled(promises);
+
+            const terminalsRes = (results[0].status === 'fulfilled' && results[0].value.ok) ? await results[0].value.json() : null;
+            
+            if(terminalsRes && JSON.stringify(terminalsRes) !== JSON.stringify(rawData)) {
+                rawData = terminalsRes;
+                processData();
+            }
+
+            if (user.role === 'admin' && results.length > 1 && results[1].status === 'fulfilled' && results[1].value.ok) {
+                const users = await results[1].value.json();
+                updateNotifications(users);
+            }
+
         } catch (err) {
-            console.error(err);
+            console.error("Error fetching device data:", err);
         }
     }
 
     function setFilter(el) {
+        if (!el) return;
         document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
         el.classList.add('active');
         currentFilter = el.getAttribute('data-filter');
@@ -145,9 +308,9 @@
             const status = d.last_status || 'none';
 
             if (currentFilter === 'pass') matchesType = (status === 'pass');
-            if (currentFilter === 'failed') matchesType = (status === 'fail');
-            if (currentFilter === 'none') matchesType = (status === 'none');
-            if (currentFilter === 'recent') {
+            else if (currentFilter === 'failed') matchesType = (status === 'fail');
+            else if (currentFilter === 'none') matchesType = (status === 'none');
+            else if (currentFilter === 'recent') {
                 if (!d.last_diag_time) return false;
                 const diff = (now - new Date(d.last_diag_time)) / (1000 * 60 * 60);
                 matchesType = (diff <= 24);
@@ -164,22 +327,47 @@
         tbody.innerHTML = '';
         data.forEach(d => {
             const status = d.last_status || 'none';
-            tbody.innerHTML += `
-                <tr>
-                    <td><strong>${d.terminal_id}</strong></td>
-                    <td>${d.manufacturer || '-'}</td>
-                    <td>${d.model || '-'}</td>
-                    <td>${d.last_diag_time ? new Date(d.last_diag_time).toLocaleString() : 'Never'}</td>
-                    <td><span class="status-badge ${status}">${status.toUpperCase()}</span></td>
-                    <td><a href="/index.html?terminal_id=${d.terminal_id}" class="view-link">View Details</a></td>
-                </tr>
+            const newRow = document.createElement('tr');
+            newRow.dataset.terminalId = d.terminal_id;
+            newRow.innerHTML = `
+                <td><strong>${d.terminal_id}</strong></td>
+                <td>${d.manufacturer || '-'}</td>
+                <td>${d.model || '-'}</td>
+                <td>${d.last_diag_time ? new Date(d.last_diag_time).toLocaleString() : 'Never'}</td>
+                <td><span class="status-badge ${status}">${status.toUpperCase()}</span></td>
+                <td><a href="index.html?terminal_id=${d.terminal_id}" class="view-link">View Details</a></td>
             `;
+            tbody.appendChild(newRow);
         });
     }
 
-    function logout() {
-        sessionStorage.clear();
-        window.location.href = '/login.html';
+    function updateNotifications(users) {
+        const notificationBell = document.getElementById('notification-bell');
+        const countElement = notificationBell.querySelector('.notification-count');
+        const dropdown = notificationBell.querySelector('.notification-dropdown');
+        
+        if (!users || user.role !== 'admin') {
+            notificationBell.style.display = 'none';
+            return;
+        }
+
+        notificationBell.style.display = 'block';
+        const pendingUsers = users.filter(u => u.status === 'pending');
+        dropdown.innerHTML = '';
+
+        if (pendingUsers.length > 0) {
+            countElement.innerText = pendingUsers.length;
+            countElement.style.display = 'block';
+            pendingUsers.forEach(user => {
+                const link = document.createElement('a');
+                link.href = '/users.html';
+                link.innerText = `New signup: ${user.username}`;
+                dropdown.appendChild(link);
+            });
+        } else {
+            countElement.style.display = 'none';
+            dropdown.innerHTML = '<div class="no-notifications">No new notifications</div>';
+        }
     }
 
 </script>
