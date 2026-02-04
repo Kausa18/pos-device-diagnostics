@@ -122,7 +122,7 @@ public class HistoryActivity extends AppCompatActivity {
 
             summaryText.setText(summary);
         } else {
-            summaryText.setText(R.string.no_history_data);
+            summaryText.setText(R.string .no_history_data);
         }
 
         applyFilter("ALL");

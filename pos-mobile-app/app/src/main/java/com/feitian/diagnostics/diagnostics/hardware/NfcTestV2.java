@@ -40,7 +40,9 @@ public class NfcTestV2 implements DiagnosticTest {
 
                 @Override
                 public void onError(int i) {
-                    String errorMsg = (i == -536674300) ? "Timeout: No card tapped" : "NFC Hardware Error: " + i;
+                    String errorMsg = (i == -536674300)
+                            ? "No NFC tap detected within 10 seconds. Please retry."
+                            : "NFC Hardware Error: " + i;
                     finalResult[0] = new DiagnosticResult(getName(), DiagnosticStatus.FAIL, errorMsg);
                     latch.countDown();
                 }
@@ -48,7 +50,7 @@ public class NfcTestV2 implements DiagnosticTest {
 
             if (!latch.await(12, TimeUnit.SECONDS)) {
                 nfcReader.cancel();
-                return new DiagnosticResult(getName(), DiagnosticStatus.FAIL, "NFC Test timed out");
+                return new DiagnosticResult(getName(), DiagnosticStatus.FAIL, "No NFC tap detected within 10 seconds. Please retry.");
             }
 
             return finalResult[0];

@@ -39,7 +39,7 @@ public class CardReaderTestV2 {
 
                     @Override
                     public void onError(int i) {
-                        result[0] = new DiagnosticResult(getName(), DiagnosticStatus.FAIL, "No card detected or error: " + i);
+                        result[0] = new DiagnosticResult(getName(), DiagnosticStatus.FAIL, "No card detected within 10 seconds. Please retry. (Error: " + i + ")");
                         latch.countDown();
                     }
                 });
@@ -47,7 +47,7 @@ public class CardReaderTestV2 {
                 // Correctly handling the result of await() to handle timeouts
                 if (!latch.await(11, TimeUnit.SECONDS)) {
                     icReader.cancel();
-                    return new DiagnosticResult(getName(), DiagnosticStatus.FAIL, "Test Timeout (11s)");
+                    return new DiagnosticResult(getName(), DiagnosticStatus.FAIL, "No card detected within 10 seconds. Please retry.");
                 }
                 
                 return result[0];

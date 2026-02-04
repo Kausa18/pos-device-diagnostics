@@ -11,6 +11,7 @@ import com.feitian.diagnostics.diagnostics.hardware.NfcTestV2;
 import com.feitian.diagnostics.diagnostics.hardware.PrinterTestV2;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class DiagnosticRunner {
@@ -30,26 +31,33 @@ public class DiagnosticRunner {
         this.listener = listener;
     }
 
+    public List<DiagnosticTest> getAllTests() {
+        return Arrays.asList(
+                new DeviceInfoTestV2(),
+                new BatteryTestV2(),
+                new NetworkTestV2(),
+                new SignalStrengthTestV2(),
+                new StorageTestV2(),
+                new PrinterTestV2(),
+                new LedBuzzerTestV2(),
+                new ChargingPortTestV2(),
+                new CardReaderTestV2.IcReaderTest(),
+                new NfcTestV2(),
+                new TouchscreenTestV2()
+        );
+    }
+
+    public int getTestCount() {
+        return getAllTests().size();
+    }
+
     public void runAll() {
         results.clear();
         new Thread(() -> {
-            // 1. Automated Tests
-            runSingleSync(new DeviceInfoTestV2());
-            runSingleSync(new BatteryTestV2());
-            runSingleSync(new NetworkTestV2());
-            runSingleSync(new SignalStrengthTestV2());
-            runSingleSync(new StorageTestV2());
-            runSingleSync(new PrinterTestV2());
-            runSingleSync(new LedBuzzerTestV2());
-
-            // 2. Interactive Tests
-            runSingleSync(new ChargingPortTestV2());
-            runSingleSync(new CardReaderTestV2.IcReaderTest());
-            runSingleSync(new NfcTestV2());
-            
-            // 3. Touchscreen Test (Now integrated properly)
-            runSingleSync(new TouchscreenTestV2());
-
+            List<DiagnosticTest> allTests = getAllTests();
+            for (DiagnosticTest test : allTests) {
+                runSingleSync(test);
+            }
             mainHandler.post(() -> listener.onAllTestsComplete(new ArrayList<>(results)));
         }).start();
     }

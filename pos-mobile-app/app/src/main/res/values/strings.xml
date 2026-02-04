@@ -1,91 +1,111 @@
 <resources>
-    <string name="app_name">Izyane Diagnostics</string>
+    <string name="app_name">iZyane Diagnostics</string>
+
+    <!-- UI Titles -->
+    <string name="diagnostics_title">Diagnostics</string>
+    <string name="running_diagnostics_title">Running Diagnostics</string>
+    <string name="health_overview_title">Terminal Health Overview</string>
+    <string name="title_test_result">Test Result</string>
+    <string name="label_history">History</string>
+    <string name="diagnostic_history_title">Diagnostic History</string>
+    <string name="diagnosis_detail_title">Diagnosis Detail</string>
+    <string name="touch_line_test_title">Touch Sensor Scan</string>
+    <string name="touch_pad">Touch Pad</string>
+
+    <!-- Dashboard Header -->
+    <string name="total_runs">Cumulative Runs</string>
+    <string name="cumulative_runs">Cumulative Runs</string>
+    <string name="system_state">System State</string>
+    <string name="never_scanned">Not recorded</string>
+    <string name="dashboard_last_run">Last run: %1$s</string>
+    <string name="dashboard_state_ready">READY</string>
+    <string name="dashboard_state_healthy">HEALTHY</string>
+    <string name="dashboard_state_issues">ISSUES</string>
+    <string name="dashboard_never_scanned">Not recorded</string>
+    <string name="dashboard_all_systems_healthy">All Systems Healthy</string>
+    <string name="dashboard_issues_detected">%1$d Issues Detected</string>
+    <string name="state_ready">READY</string>
+    <string name="state_nominal">HEALTHY</string>
+    <string name="state_issues">ISSUES</string>
+    <string name="last_scan_prefix">Last run: %1$s</string>
+    <string name="issues_detected">%1$d Issues Detected</string>
+    <string name="all_systems_healthy">All Systems Healthy</string>
+    <string name="issues_label">Issues Found</string>
+
+    <!-- Test Grid Labels -->
+    <string name="label_device_info">Device Info</string>
+    <string name="label_battery">Battery Health</string>
+    <string name="label_network">Network Connectivity</string>
+    <string name="label_signal">Signal Strength</string>
+    <string name="label_storage">Storage Space</string>
+    <string name="label_printer">Printer Test</string>
+    <string name="label_led_buzzer">Indicators Test</string>
+    <string name="label_ic_card">Chip Card Reader</string>
+    <string name="label_nfc_tap">NFC Contactless</string>
+    <string name="label_touch">Touch Sensitivity</string>
+    <string name="label_charging">Power Input</string>
+
+    <!-- Status & Logs -->
     <string name="status_running_diagnostics">Status: Running diagnostics…</string>
-    <string name="starting_diagnostics">Starting diagnostics…\n</string>
-    <string name="test_1_passed">Test 1: Passed\n</string>
-    <string name="test_2_passed">Test 2: Passed\n</string>
-    <string name="status_diagnostics_complete">Status: Diagnostics complete</string>
-    <string name="status_uploading">Status: Uploading results…</string>
-    <string name="status_upload_successful">Status: Upload successful</string>
-    <string name="status_upload_failed">Status: Upload failed</string>
-    <string name="upload_success">\nUpload: SUCCESS\n</string>
-    <string name="upload_failed">\nUpload: FAILED\nReason: %1$s\n</string>
-    <string name="results_saved_locally">\n⚠ Results saved locally.\nThey will be uploaded when network is available.\n</string>
-    <string name="diagnostics_complete_banner">\n====================\nDiagnostics Complete\n====================\n</string>
+    <string name="status_hardware_ready">System Ready: Hardware Bound</string>
+    <string name="status_hardware_bound">System Ready: Hardware Bound</string>
+    <string name="status_hardware_failed">Hardware Binding Failed: %1$d</string>
+    <string name="status_hardware_binding_failed">Hardware Binding Failed: %1$d</string>
     <string name="status_test_complete">Test Complete</string>
     <string name="status_touch_test_complete">Touch Test Complete</string>
-    <string name="running_test_prefix">Running: %1$s\n</string>
-    <string name="receipt_printed_manually">\nReceipt printed manually.\n</string>
-    <string name="no_history_data">No data available yet.</string>
-    <string name="no_history_records_found">No records found for filter: %1$s</string>
+    <string name="system_standby_log">> System standby</string>
+    <string name="log_starting_test">> Starting: %1$s\n</string>
+    <string name="initializing">Initializing…</string>
     <string name="all_tests_complete">All Tests Complete</string>
     <string name="finalizing_report">Finalizing report…</string>
     <string name="upload_successful">Upload Successful</string>
     <string name="upload_failed_with_reason">Upload Failed: %1$s</string>
-    <string name="countdown_zero">0.0s</string>
-    <string name="initial_test_count">0</string>
-
-    <!-- UI Templates -->
-    <string name="test_count_template">/%1$d</string>
-    <string name="of_total_tests_template">OF %1$d TESTS</string>
-    <string name="countdown_format">%1$.1fs</string>
-    <string name="total_test_count_static">/11</string>
-    <string name="of_11_tests_static">OF 11 TESTS</string>
-    <string name="left_to_test_template">%1$d left to test</string>
-    <string name="test_result_template">%1$s: %2$s</string>
-
-    <!-- UI Labels -->
-    <string name="running_diagnostics_title">Running Diagnostics</string>
-    <string name="initializing">Initializing…</string>
-    <string name="print_receipt">Print Receipt</string>
-    <string name="back_to_dashboard">Back to Dashboard</string>
-    <string name="diagnostics_title">Diagnostics</string>
-    <string name="test_individually_hint">You can test a function individually by tapping its icon.</string>
-    <string name="start_all_tests">Start all tests</string>
-    <string name="test_name_placeholder">Test Name</string>
-    <string name="diagnosis_detail_title">Diagnosis Detail</string>
     <string name="battery_status_placeholder">Battery status</string>
     <string name="normal_status_placeholder">Normal</string>
     <string name="battery_details_placeholder">Life: Good\nCapacity: 3100 mAh</string>
-    <string name="print_test_receipt">Print Test Receipt</string>
-    <string name="retry">Retry</string>
-    <string name="diagnostic_history_title">Diagnostic History</string>
     <string name="loading_stats">Loading stats…</string>
+    <string name="searching_history">Searching history…</string>
+
+    <!-- Actions -->
+    <string name="start_all_tests">Start all tests</string>
+    <string name="print_receipt">Print Receipt</string>
+    <string name="print_test_receipt">Print Test Receipt</string>
+    <string name="back_to_dashboard">Back to Dashboard</string>
+    <string name="finish_test">Finish Test</string>
+    <string name="action_retry_caps">RETRY</string>
+    <string name="action_continue">CONTINUE</string>
+    <string name="label_view_last_report">VIEW LAST REPORT</string>
+    <string name="back">Back</string>
+    <string name="export_csv">Export CSV</string>
+    <string name="retry">Retry</string>
+    <string name="clear_canvas">Clear Canvas</string>
+
+    <!-- Prompts & Hints -->
+    <string name="action_required">Action Required</string>
+    <string name="test_individually_hint">You can test a function individually by tapping its icon.</string>
+    <string name="draw_across_screen_hint">DRAW LINES ACROSS ENTIRE SCREEN\nVERIFY EDGES AND CORNERS</string>
+    <string name="tap_anywhere_to_verify">TAP ANYWHERE TO VERIFY</string>
+    <string name="tap_anywhere_to_verify_sensor">Tap anywhere to verify sensor</string>
+
+    <!-- History -->
+    <string name="history_no_data">No data available yet.</string>
+    <string name="no_history_data">No data available yet.</string>
+    <string name="no_history_records_found">No records found for filter: %1$s</string>
+
+    <!-- History Filters -->
     <string name="filter_all">All</string>
     <string name="filter_pass">Pass</string>
     <string name="filter_fail">Fail</string>
-    <string name="searching_history">Searching history…</string>
-    <string name="back">Back</string>
-    <string name="export_csv">Export CSV</string>
-    <string name="system_standby_log">> System standby</string>
-    <string name="history_label">History</string>
-    <string name="action_required">Action Required</string>
-    <string name="continue_testing">Continue Testing</string>
-    <string name="touch_pad">TOUCH PAD</string>
-    <string name="tap_anywhere_to_verify">TAP ANYWHERE TO VERIFY</string>
-    <string name="tap_anywhere_to_verify_sensor">TAP ANYWHERE TO VERIFY SENSOR</string>
+
+    <!-- Progress & Templates -->
+    <string name="initial_test_count">0</string>
+    <string name="total_test_count_static">/11</string>
+    <string name="of_11_tests_static">OF 11 TESTS</string>
+    <string name="countdown_zero">0.0s</string>
+    <string name="test_count_template">/%1$d</string>
+    <string name="left_to_test_template">%1$d left to test</string>
+    <string name="status_passed_caps">PASSED</string>
+    <string name="status_failed_caps">FAILED</string>
+    <string name="test_name_placeholder">Test Result</string>
     <string name="touch_timer_default">30.0s</string>
-    <string name="touch_timer_drawing">30.0s</string>
-    <string name="status_hardware_bound">System Ready: Hardware Bound</string>
-    <string name="status_hardware_binding_failed">Hardware Binding Failed: %1$d</string>
-    <string name="log_starting_test">> Starting: %1$s\n</string>
-
-    <!-- Test Labels -->
-    <string name="label_device_info">Device Info</string>
-    <string name="label_battery">Battery</string>
-    <string name="label_network">Network</string>
-    <string name="label_signal">Signal</string>
-    <string name="label_storage">Storage</string>
-    <string name="label_printer">Printer</string>
-    <string name="label_led_buzzer">LED/Buzzer</string>
-    <string name="label_ic_card">IC Card</string>
-    <string name="label_nfc_tap">NFC Tap</string>
-    <string name="label_touch">Touch</string>
-    <string name="label_charging">Charging</string>
-
-    <!-- Touch Test Specific -->
-    <string name="touch_line_test_title">TOUCH SENSOR SCAN</string>
-    <string name="draw_across_screen_hint">DRAW LINES ACROSS ENTIRE SCREEN\nVERIFY EDGES AND CORNERS</string>
-    <string name="finish_test">Finish Test</string>
-    <string name="clear_canvas">Clear Canvas</string>
 </resources>

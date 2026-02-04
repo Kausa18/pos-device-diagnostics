@@ -46,6 +46,7 @@ public class DiagnosticsFlowActivity extends AppCompatActivity implements Diagno
     private MaterialButton btnPrintReceipt;
     
     private int completedCount = 0;
+    private int totalTests = 0;
     private List<DiagnosticResult> latestResults;
     private CountDownTimer currentTimer;
 
@@ -86,6 +87,16 @@ public class DiagnosticsFlowActivity extends AppCompatActivity implements Diagno
         });
 
         DiagnosticRunner runner = new DiagnosticRunner(getApplicationContext(), this);
+        totalTests = runner.getTestCount();
+        diagnosticsProgress.setMax(totalTests);
+        
+        // Initialize UI with accurate total
+        TextView totalLabel = findViewById(R.id.totalTestCountLabel);
+        if (totalLabel != null) {
+            totalLabel.setText(getString(R.string.test_count_template, totalTests));
+        }
+        leftToTestText.setText(getString(R.string.left_to_test_template, totalTests));
+
         runner.runAll();
     }
 
@@ -179,7 +190,7 @@ public class DiagnosticsFlowActivity extends AppCompatActivity implements Diagno
             testCountText.setText(String.valueOf(completedCount));
             diagnosticsProgress.setProgress(completedCount);
             
-            int left = 11 - completedCount;
+            int left = totalTests - completedCount;
             leftToTestText.setText(getString(R.string.left_to_test_template, left));
         });
     }

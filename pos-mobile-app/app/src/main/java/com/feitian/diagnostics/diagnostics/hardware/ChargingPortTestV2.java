@@ -37,7 +37,7 @@ public class ChargingPortTestV2 implements DiagnosticTest {
             return new DiagnosticResult(getName(), DiagnosticStatus.FAIL, "Test interrupted.");
         }
 
-        return new DiagnosticResult(getName(), DiagnosticStatus.FAIL, "No charger detected within 10 seconds.");
+        return new DiagnosticResult(getName(), DiagnosticStatus.FAIL, "No charger detected within 10 seconds. Please retry.");
     }
 
     private boolean isPluggedIn(Context context) {
